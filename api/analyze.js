@@ -44,7 +44,7 @@ export default async function handler(req, res) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "llama-3.3-70b-versatile", // النموذج الجديد والمستقر
+        model: "mixtral-8x7b-32768", // النموذج الجديد المضمون
         temperature: 0.4,
         max_tokens: 1024,
         messages: [
@@ -67,4 +67,4 @@ export default async function handler(req, res) {
   } catch (err) {
     return res.status(500).json({ error: `خطأ في الاتصال: ${err.message}` });
   }
-      }
+        }
