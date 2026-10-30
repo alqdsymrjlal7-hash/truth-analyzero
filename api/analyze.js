@@ -1,4 +1,5 @@
 export default async function handler(req, res) {
+  // إعدادات السماح بالاتصال (CORS)
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
@@ -42,7 +43,7 @@ export default async function handler(req, res) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant", // النموذج الرسمي الحالي
+        model: "openai/gpt-oss-20b", // تم تحديث النموذج هنا ليعمل فوراً
         temperature: 0.4,
         max_tokens: 1024,
         messages: [
@@ -59,6 +60,8 @@ export default async function handler(req, res) {
 
     const data = await groqRes.json();
     let content = data.choices?.[0]?.message?.content?.trim();
+    
+    // تنظيف أي علامات إضافية قد يضيفها النموذج
     content = content.replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
 
     return res.status(200).json(JSON.parse(content));
