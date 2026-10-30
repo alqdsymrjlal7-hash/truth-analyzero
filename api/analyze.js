@@ -1,7 +1,9 @@
 export default async function handler(req, res) {
+  // إعدادات السماح بالاتصال (CORS)
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  
   if (req.method === "OPTIONS") return res.status(204).end();
   if (req.method !== "POST") return res.status(405).json({ error: "Method not allowed" });
 
@@ -43,7 +45,7 @@ export default async function handler(req, res) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "llama-3.1-8b-instant",
+        model: "llama3-8b-8192", // تم تغيير اسم النموذج هنا
         temperature: 0.4,
         max_tokens: 1024,
         messages: [
@@ -60,10 +62,12 @@ export default async function handler(req, res) {
 
     const data = await groqRes.json();
     let content = data.choices?.[0]?.message?.content?.trim();
+    
+    // تنظيف أي علامات إضافية قد يضيفها النموذج
     content = content.replace(/^```json\s*/i, "").replace(/```$/i, "").trim();
 
     return res.status(200).json(JSON.parse(content));
   } catch (err) {
     return res.status(500).json({ error: `خطأ في الاتصال: ${err.message}` });
   }
-}
+          }
