@@ -24,17 +24,16 @@ export default async function handler(req, res) {
   "hedging_signals": ["عبارات غامضة أو تهرب أو تقليل من الشأن"],
   "emotional_markers": ["كلمات تكشف الحالة العاطفية"],
   "manipulation_patterns": [
-    {"phrase": "العبارة", "pattern": "اسم النمط (تشتيت/تقليل/وعود غامضة/إلزام بالذنب)", "why": "شرح قصير"}
+    {"phrase": "العبارة", "pattern": "اسم النمط", "why": "شرح قصير"}
   ],
   "summary": "خلاصة في 3 أسطر بأسلوب مشوّق",
-  "disclaimer_hint": "جملة تذكير بأن التحليل لغوي وليس حكمًا على الصدق"
+  "disclaimer_hint": "جملة تذكير بأن التحليل لغوي"
 }
 
 قواعد صارمة:
-- لا تُخرج أي نسبة مئوية للصدق أو الكذب إطلاقًا.
-- لا تصف الشخص بأنه "كاذب" — صف النص فقط.
-- إن كان النص قصيرًا جدًا أو غير كافٍ، قل ذلك بصراحة في summary.
-- أعد JSON صالحًا فقط دون أي نص إضافي أو علامات markdown.`;
+- لا تُخرج أي نسبة مئوية.
+- لا تصف الشخص بأنه "كاذب".
+- أعد JSON صالحًا فقط دون أي نص إضافي.`;
 
   try {
     const groqRes = await fetch("https://api.groq.com/openai/v1/chat/completions", {
@@ -55,7 +54,8 @@ export default async function handler(req, res) {
     });
 
     if (!groqRes.ok) {
-      return res.status(502).json({ error: "تعذّر إكمال التحليل حاليًا. حاول لاحقًا." });
+      const errorDetails = await groqRes.text();
+      return res.status(502).json({ error: `خطأ Groq: ${errorDetails}` });
     }
 
     const data = await groqRes.json();
@@ -64,6 +64,6 @@ export default async function handler(req, res) {
 
     return res.status(200).json(JSON.parse(content));
   } catch (err) {
-    return res.status(500).json({ error: "خطأ في الاتصال بخدمة التحليل." });
+    return res.status(500).json({ error: `خطأ في الاتصال: ${err.message}` });
   }
 }
