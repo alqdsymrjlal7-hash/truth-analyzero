@@ -17,7 +17,6 @@ export default async function handler(req, res) {
   }
 
   const systemPrompt = `أنت محلل لغوي متخصص في أنماط التواصل، وأسلوبك مشوّق كأسلوب محقق لغوي، لكنك دقيق علميًا ولا تدّعي قراءة الأفكار.
-
 حلّل النص المُرفق وأعد النتيجة بصيغة JSON فقط بهذا الشكل:
 {
   "tone": "وصف النبرة العامة في جملة",
@@ -30,7 +29,6 @@ export default async function handler(req, res) {
   "summary": "خلاصة في 3 أسطر بأسلوب مشوّق",
   "disclaimer_hint": "جملة تذكير بأن التحليل لغوي"
 }
-
 قواعد صارمة:
 - لا تُخرج أي نسبة مئوية.
 - لا تصف الشخص بأنه "كاذب".
@@ -44,7 +42,7 @@ export default async function handler(req, res) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "mixtral-8x7b-32768", // النموذج الجديد المضمون
+        model: "llama-3.1-8b-instant", // النموذج الرسمي الحالي
         temperature: 0.4,
         max_tokens: 1024,
         messages: [
@@ -67,4 +65,4 @@ export default async function handler(req, res) {
   } catch (err) {
     return res.status(500).json({ error: `خطأ في الاتصال: ${err.message}` });
   }
-        }
+}
