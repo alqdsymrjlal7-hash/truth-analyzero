@@ -1,4 +1,3 @@
-
 /* =====================================================
    NEXUS AI — PREMIUM TEXT INTELLIGENCE
    Complete Visual Redesign | RTL + LTR | Responsive
@@ -425,6 +424,37 @@ html[dir="rtl"] .char-counter {
   margin-bottom: 26px !important;
 }
 
+/* 🌟 IMAGE UPLOAD SECTION */
+#uploadImageBtn {
+  width: 100%;
+  border: 2px dashed var(--border);
+  padding: 15px;
+  border-radius: 14px;
+  color: var(--text-muted);
+  background: var(--surface);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  font-weight: 700;
+  font-family: inherit;
+}
+
+#uploadImageBtn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(53, 214, 197, 0.05);
+}
+
+#imageName {
+  color: var(--accent);
+  font-size: 0.85rem;
+  margin-top: 10px;
+  font-weight: 600;
+}
+
 /* TAGS */
 
 .tags-section {
@@ -740,6 +770,35 @@ html[dir="ltr"] .result-list li:hover {
   transform: translateX(3px);
 }
 
+/* 🌟 HISTORY LIST STYLES */
+#historyList li {
+  cursor: pointer;
+  transition: background 0.3s, border-color 0.3s;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+#historyList li:hover {
+  background: rgba(53, 214, 197, 0.08);
+  border-color: var(--accent);
+}
+
+.history-snippet {
+  font-size: 0.9rem;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.history-date {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-family: 'Inter', sans-serif;
+}
+
 /* MANIPULATION PATTERNS */
 
 .patterns-list {
@@ -803,6 +862,84 @@ html[dir="ltr"] .result-list li:hover {
   margin-bottom: 25px;
 }
 
+/* 🌟 RESULT ACTIONS (أزرار النسخ والواتساب والتحميل) */
+.result-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.result-actions > div {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.copy-btn, .wa-btn {
+  flex: 1;
+  padding: 14px;
+  border-radius: 12px;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-main);
+}
+
+.copy-btn:hover {
+  background: rgba(53, 214, 197, 0.1);
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-2px);
+}
+
+.wa-btn {
+  background: rgba(37, 211, 102, 0.1);
+  border-color: rgba(37, 211, 102, 0.3);
+  color: #25d366;
+}
+.wa-btn:hover {
+  background: rgba(37, 211, 102, 0.2);
+  border-color: #25d366;
+  transform: translateY(-2px);
+}
+
+.download-btn {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid rgba(102, 139, 255, 0.3);
+  border-radius: 14px;
+  color: #fff;
+  background: linear-gradient(120deg, #668bff, #8b7bff);
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+.download-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(102, 139, 255, 0.3);
+}
+.download-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 /* SHARE */
 
 .share-btn {
@@ -822,6 +959,25 @@ html[dir="ltr"] .result-list li:hover {
 .share-btn:hover {
   transform: translateY(-3px);
   box-shadow: 0 12px 30px rgba(52,211,153,.2);
+}
+
+/* 🌟 FIX FOR IMAGE CAPTURE */
+.result-card.capturing {
+  background: #080d18 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid #35d6c5 !important;
+  margin: 0 !important;
+}
+.result-card.capturing .result-text,
+.result-card.capturing .result-list li,
+.result-card.capturing .pattern-item {
+  background: #111b2e !important;
+  color: #edf5ff !important;
+  border-color: #1c2b45 !important;
+}
+.result-card.capturing .result-text {
+  border-inline-start: 4px solid #35d6c5 !important;
 }
 
 /* FOOTER */
@@ -1168,4 +1324,4 @@ a:focus-visible {
   .tags {
     gap: 7px;
   }
-}
+   }
