@@ -94,6 +94,26 @@ const translations = {
 
 let currentLang = 'ar';
 
+// ================= دالة الإشعارات الأنيقة =================
+function showToast(message, isError = false) {
+  let container = document.querySelector('.toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `toast ${isError ? 'error' : ''}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.animation = 'fadeOut 0.3s forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, 3000);
+}
+
 // ================= دالة تغيير اللغة =================
 function toggleLanguage() {
   currentLang = currentLang === 'ar' ? 'en' : 'ar';
@@ -113,7 +133,6 @@ function toggleLanguage() {
     langOtherBtn.textContent = 'EN';
   }
 
-  // تحديث جميع النصوص
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (translations[currentLang][key]) {
@@ -121,7 +140,6 @@ function toggleLanguage() {
     }
   });
 
-  // تحديث placeholders
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');
     if (translations[currentLang][key]) {
@@ -132,12 +150,27 @@ function toggleLanguage() {
 
 document.getElementById('langToggle').addEventListener('click', toggleLanguage);
 
-// ================= عدّاد الأحرف =================
+// ================= عدّاد الأحرف وتكبير المربع تلقائياً =================
 const messageInput = document.getElementById('messageInput');
 const charCount = document.getElementById('charCount');
 
-messageInput.addEventListener('input', () => {
-  charCount.textContent = messageInput.value.length;
+messageInput.addEventListener('input', function() {
+  // تحديث عدد الأحرف
+  charCount.textContent = this.value.length;
+  
+  // تصفير الطول للسماح بالحساب الصحيح
+  this.style.height = '80px'; 
+  
+  // حساب الطول الجديد بناءً على المحتوى
+  const newHeight = Math.min(this.scrollHeight, 300); // حد أقصى 300 بكسل
+  this.style.height = newHeight + 'px';
+  
+  // إظهار شريط التمرير إذا وصل للحد الأقصى
+  if (this.scrollHeight > 300) {
+    this.style.overflowY = 'auto';
+  } else {
+    this.style.overflowY = 'hidden';
+  }
 });
 
 // ================= تفعيل الأزرار (Tags) =================
@@ -184,10 +217,8 @@ function stopLoadingAnimation() {
 
 // ================= عرض النتائج =================
 function displayResults(data) {
-  // النبرة
   document.getElementById('resultTone').textContent = data.tone || '-';
 
-  // دوال مساعدة لملء القوائم
   const fillList = (elementId, items, emptyText) => {
     const ul = document.getElementById(elementId);
     ul.innerHTML = '';
@@ -206,7 +237,6 @@ function displayResults(data) {
   fillList('resultHedging', data.hedging_signals, translations[currentLang].no_signals);
   fillList('resultEmotional', data.emotional_markers, translations[currentLang].no_signals);
 
-  // أنماط التلاعب
   const manipulationContainer = document.getElementById('resultManipulation');
   manipulationContainer.innerHTML = '';
   if (!data.manipulation_patterns || data.manipulation_patterns.length === 0) {
@@ -224,10 +254,8 @@ function displayResults(data) {
     });
   }
 
-  // الخلاصة
   document.getElementById('resultSummary').textContent = data.summary || '-';
 
-  // إظهار النتيجة وإخفاء صندوق التحليل
   document.getElementById('analyzerCard').style.display = 'none';
   document.getElementById('loadingBox').hidden = true;
   document.getElementById('resultCard').hidden = false;
@@ -238,18 +266,16 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
   const text = messageInput.value.trim();
   
   if (text.length < 5) {
-    alert(translations[currentLang].error_empty);
+    showToast(translations[currentLang].error_empty, true);
     return;
   }
 
-  // تجهيز واجهة المستخدم
   document.getElementById('analyzerCard').style.display = 'none';
   document.getElementById('resultCard').hidden = true;
   document.getElementById('loadingBox').hidden = false;
   startLoadingAnimation();
 
   try {
-    // الاتصال بالـ API
     const response = await fetch('/api/analyze', {
       method: 'POST',
       headers: {
@@ -258,7 +284,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
       body: JSON.stringify({ text: text })
     });
 
-    // تعديل مهم: قراءة رسالة الخطأ الحقيقية من الخادم إذا فشل الطلب
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       throw new Error(errorData.error || 'API Error');
@@ -266,7 +291,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
 
     const data = await response.json();
     
-    // إظهار النتائج مباشرة (تمت إزالة التأخير)
     stopLoadingAnimation();
     displayResults(data);
 
@@ -276,8 +300,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     document.getElementById('loadingBox').hidden = true;
     document.getElementById('analyzerCard').style.display = 'block';
     
-    // تعديل مهم: إظهار سبب الخطأ الحقيقي للمستخدم
-    alert(error.message || translations[currentLang].error_api);
+    showToast(error.message || translations[currentLang].error_api, true);
   }
 });
 
@@ -285,6 +308,11 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
 document.getElementById('resetBtn').addEventListener('click', () => {
   messageInput.value = '';
   charCount.textContent = '0';
+  
+  // إرجاع المربع لحجمه الصغير
+  messageInput.style.height = '80px';
+  messageInput.style.overflowY = 'hidden';
+
   tagButtons.forEach(b => b.classList.remove('active'));
   
   document.getElementById('resultCard').hidden = true;
@@ -293,10 +321,10 @@ document.getElementById('resetBtn').addEventListener('click', () => {
 
 // ================= زر المشاركة =================
 document.getElementById('shareBtn').addEventListener('click', () => {
-  // نسخ رابط الموقع الحالي للمشاركة
   navigator.clipboard.writeText(window.location.href).then(() => {
-    alert(currentLang === 'ar' ? 'تم نسخ رابط الموقع بنجاح! شاركه مع أصدقائك.' : 'Link copied successfully! Share it with your friends.');
+    showToast(currentLang === 'ar' ? 'تم نسخ رابط الموقع بنجاح! 🎉 شاركه مع أصدقائك.' : 'Link copied successfully! 🎉 Share it with your friends.');
   }).catch(err => {
     console.error('Failed to copy: ', err);
+    showToast(currentLang === 'ar' ? 'فشل نسخ الرابط' : 'Failed to copy link', true);
   });
 });
