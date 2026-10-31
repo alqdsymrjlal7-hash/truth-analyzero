@@ -7,6 +7,8 @@ const translations = {
     hero_subtitle: "ألصق الرسالة المشبوهة، ودع المحلل يكشف لك أنماط اللغة والتلاعب العاطفي في ثوانٍ.",
     input_label: "النص المراد تحليله",
     input_placeholder: "ألصق الرسالة أو المحادثة هنا لفحصها...",
+    question_label: "هل لديك سؤال حول النص؟ (اختياري)",
+    question_placeholder: "مثال: هل هذا الشخص يهددني؟ أو كيف أرد عليه؟",
     tags_label: "نوع العلاقة (اختياري):",
     tag_partner: "شريك حياة",
     tag_colleague: "زميل عمل",
@@ -25,6 +27,7 @@ const translations = {
     result_emotional: "البصمات العاطفية",
     result_manipulation: "أنماط التلاعب المحتملة",
     result_summary: "الخلاصة",
+    result_answer_title: "إجابة سؤالك",
     result_disclaimer: "⚠️ هذا تحليل لغوي تعليمي، وليس دليلًا على الصدق أو الكذب.",
     result_share: "شارك النتيجة مع أصدقائك",
     footer_copy: "© 2026 جميع الحقوق محفوظة لدى ",
@@ -53,6 +56,8 @@ const translations = {
     hero_subtitle: "Paste the suspicious message and let the analyzer uncover language patterns and emotional manipulation in seconds.",
     input_label: "Text to Analyze",
     input_placeholder: "Paste the message or conversation here to scan...",
+    question_label: "Do you have a question about the text? (Optional)",
+    question_placeholder: "Example: Is this person threatening me? Or how should I reply?",
     tags_label: "Relationship type (optional):",
     tag_partner: "Partner",
     tag_colleague: "Colleague",
@@ -71,6 +76,7 @@ const translations = {
     result_emotional: "Emotional Markers",
     result_manipulation: "Potential Manipulation Patterns",
     result_summary: "Summary",
+    result_answer_title: "Answer to your question",
     result_disclaimer: "⚠️ This is an educational linguistic analysis, not evidence of truthfulness.",
     result_share: "Share Results with Friends",
     footer_copy: "© 2026 All rights reserved to ",
@@ -107,7 +113,6 @@ function setThemeByTime() {
     document.body.classList.remove('light-mode');
   }
 }
-
 setThemeByTime();
 
 // ================= 2. دالة الإشعارات الأنيقة (Toast) =================
@@ -168,6 +173,7 @@ document.getElementById('langToggle').addEventListener('click', toggleLanguage);
 
 // ================= 4. عدّاد الأحرف وتكبير المربع تلقائياً =================
 const messageInput = document.getElementById('messageInput');
+const questionInput = document.getElementById('questionInput');
 const charCount = document.getElementById('charCount');
 
 messageInput.addEventListener('input', function() {
@@ -266,6 +272,14 @@ function displayResults(data) {
 
   document.getElementById('resultSummary').textContent = data.summary || '-';
 
+  // إظهار إجابة السؤال إذا وجدت
+  if (data.answer && data.answer !== "null" && data.answer.trim() !== "") {
+    document.getElementById('resultAnswer').textContent = data.answer;
+    document.getElementById('resultAnswerBlock').hidden = false;
+  } else {
+    document.getElementById('resultAnswerBlock').hidden = true;
+  }
+
   document.getElementById('analyzerCard').style.display = 'none';
   document.getElementById('loadingBox').hidden = true;
   document.getElementById('resultCard').hidden = false;
@@ -274,6 +288,7 @@ function displayResults(data) {
 // ================= 9. زر التحليل الرئيسي =================
 document.getElementById('analyzeBtn').addEventListener('click', async () => {
   const text = messageInput.value.trim();
+  const question = questionInput.value.trim();
   
   if (text.length < 5) {
     showToast(translations[currentLang].error_empty, true);
@@ -291,7 +306,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ text: text })
+      body: JSON.stringify({ text: text, question: question })
     });
 
     if (!response.ok) {
@@ -317,6 +332,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
 // ================= 10. زر التحليل الجديد (إعادة تعيين) =================
 document.getElementById('resetBtn').addEventListener('click', () => {
   messageInput.value = '';
+  questionInput.value = ''; // تفريغ حقل السؤال
   charCount.textContent = '0';
   messageInput.style.height = '80px';
   messageInput.style.overflowY = 'hidden';
