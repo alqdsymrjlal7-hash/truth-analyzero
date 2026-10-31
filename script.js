@@ -27,7 +27,8 @@ const translations = {
     result_summary: "الخلاصة",
     result_disclaimer: "⚠️ هذا تحليل لغوي تعليمي، وليس دليلًا على الصدق أو الكذب.",
     result_share: "شارك النتيجة مع أصدقائك",
-    footer_copy: "© 2026 محلل النبرة. جميع الحقوق محفوظة لدى شركة القدسي سوفت .",
+    footer_copy: "© 2026 جميع الحقوق محفوظة لدى ",
+    company_name: "شركة القدسي سوفت",
     footer_privacy: "سياسة الخصوصية",
     footer_disclaimer: "إخلاء المسؤولية",
     privacy_title: "سياسة الخصوصية",
@@ -72,7 +73,8 @@ const translations = {
     result_summary: "Summary",
     result_disclaimer: "⚠️ This is an educational linguistic analysis, not evidence of truthfulness.",
     result_share: "Share Results with Friends",
-    footer_copy: "© 2026 Tone Analyzer. All rights reserved.",
+    footer_copy: "© 2026 All rights reserved to ",
+    company_name: "Al-Qudsi Soft",
     footer_privacy: "Privacy Policy",
     footer_disclaimer: "Disclaimer",
     privacy_title: "Privacy Policy",
@@ -97,7 +99,6 @@ let currentLang = 'ar';
 // ================= 1. التبديل التلقائي بين الوضع النهاري والليلي =================
 function setThemeByTime() {
   const hour = new Date().getHours();
-  // من 6 صباحاً حتى 6 مساءً (النهار)
   const isDayTime = hour >= 6 && hour < 18;
 
   if (isDayTime) {
@@ -107,7 +108,6 @@ function setThemeByTime() {
   }
 }
 
-// تشغيل الوضع التلقائي فور تحميل الصفحة
 setThemeByTime();
 
 // ================= 2. دالة الإشعارات الأنيقة (Toast) =================
@@ -149,7 +149,6 @@ function toggleLanguage() {
     langOtherBtn.textContent = 'EN';
   }
 
-  // تحديث جميع النصوص
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (translations[currentLang][key]) {
@@ -157,7 +156,6 @@ function toggleLanguage() {
     }
   });
 
-  // تحديث placeholders
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');
     if (translations[currentLang][key]) {
@@ -173,17 +171,11 @@ const messageInput = document.getElementById('messageInput');
 const charCount = document.getElementById('charCount');
 
 messageInput.addEventListener('input', function() {
-  // تحديث عدد الأحرف
   charCount.textContent = this.value.length;
-  
-  // تصفير الطول للسماح بالحساب الصحيح
   this.style.height = '80px'; 
-  
-  // حساب الطول الجديد بناءً على المحتوى
-  const newHeight = Math.min(this.scrollHeight, 300); // حد أقصى 300 بكسل
+  const newHeight = Math.min(this.scrollHeight, 300);
   this.style.height = newHeight + 'px';
   
-  // إظهار شريط التمرير إذا وصل للحد الأقصى
   if (this.scrollHeight > 300) {
     this.style.overflowY = 'auto';
   } else {
@@ -274,7 +266,6 @@ function displayResults(data) {
 
   document.getElementById('resultSummary').textContent = data.summary || '-';
 
-  // إخفاء صندوق الإدخال وإظهار النتائج
   document.getElementById('analyzerCard').style.display = 'none';
   document.getElementById('loadingBox').hidden = true;
   document.getElementById('resultCard').hidden = false;
@@ -289,7 +280,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     return;
   }
 
-  // تجهيز واجهة المستخدم
   document.getElementById('analyzerCard').style.display = 'none';
   document.getElementById('resultCard').hidden = true;
   document.getElementById('loadingBox').hidden = false;
@@ -328,11 +318,8 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
 document.getElementById('resetBtn').addEventListener('click', () => {
   messageInput.value = '';
   charCount.textContent = '0';
-  
-  // إرجاع المربع لحجمه الصغير
   messageInput.style.height = '80px';
   messageInput.style.overflowY = 'hidden';
-
   tagButtons.forEach(b => b.classList.remove('active'));
   
   document.getElementById('resultCard').hidden = true;
