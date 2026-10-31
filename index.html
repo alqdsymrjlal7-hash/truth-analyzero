@@ -58,7 +58,7 @@
         data-i18n-placeholder="input_placeholder"
         placeholder="ألصق الرسالة أو المحادثة هنا لفحصها..."
         maxlength="2000"
-        rows="8"
+        rows="1"
       ></textarea>
       <div class="char-counter">
         <span id="charCount">0</span> / 2000
@@ -72,6 +72,18 @@
           <button type="button" class="tag" data-tag="friend" data-i18n="tag_friend">صديق</button>
           <button type="button" class="tag" data-tag="other" data-i18n="tag_other">أخرى</button>
         </div>
+      </div>
+
+      <!-- 🌟 حقل السؤال الإضافي -->
+      <div class="question-section" style="margin-bottom: 24px;">
+        <label for="questionInput" class="field-label" data-i18n="question_label">هل لديك سؤال حول النص؟ (اختياري)</label>
+        <input 
+          type="text" 
+          id="questionInput" 
+          class="question-input" 
+          placeholder="مثال: هل هذا الشخص يهددني؟ أو كيف أرد عليه؟" 
+          data-i18n-placeholder="question_placeholder"
+        >
       </div>
 
       <button id="analyzeBtn" class="cta-btn" type="button" data-i18n="cta_button">
@@ -130,6 +142,12 @@
         <p id="resultSummary" class="result-text"></p>
       </div>
 
+      <!-- 🌟 قسم إجابة السؤال -->
+      <div class="result-block" id="resultAnswerBlock" hidden>
+        <h3 data-i18n="result_answer_title">إجابة سؤالك</h3>
+        <p id="resultAnswer" class="result-text" style="border-right-color: var(--success); color: var(--success);"></p>
+      </div>
+
       <p class="result-disclaimer" data-i18n="result_disclaimer">
         ⚠️ هذا تحليل لغوي تعليمي، وليس دليلًا على الصدق أو الكذب.
       </p>
@@ -146,9 +164,9 @@
   <!-- ================= FOOTER ================= -->
   <footer class="site-footer">
     <div class="container footer-inner">
-      <p>
-  <span data-i18n="footer_copy">© 2026 جميع الحقوق محفوظة لدى </span>
-  <a href="tel:773468764" class="company-link" data-i18n="company_name">شركة القدسي سوفت</a>
+      <p style="text-align: center; margin-top: 10px;">
+        <span data-i18n="footer_copy">© 2026 جميع الحقوق محفوظة لدى </span>
+        <a href="tel:773468764" class="company-link" data-i18n="company_name">شركة القدسي سوفت</a>
       </p>
       <div class="footer-links">
         <button type="button" class="link-btn" data-modal="privacyModal" data-i18n="footer_privacy">
