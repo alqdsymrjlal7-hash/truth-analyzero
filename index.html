@@ -6,45 +6,30 @@
   <meta name="description" content="أداة تحليل النبرة النصية لأنماط التواصل والتلاعب العاطفي" />
   <title data-i18n="page_title">محلل النبرة النصية</title>
   
-  <!-- 🌟 5. أيقونة الموقع (Favicon) -->
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
 
-  <!-- 🌟 6. وسوم Open Graph للظهور في واتساب وتويتر -->
   <meta property="og:title" content="محلل النبرة - اكشف نوايا الطرف الآخر" />
   <meta property="og:description" content="ألصق الرسالة المشبوهة، ودع المحلل يكشف لك أنماط اللغة والتلاعب العاطفي في ثوانٍ." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://truth-analyzero-1.vercel.app" />
-  <meta property="og:image" content="https://truth-analyzero-1.vercel.app/og-image.jpg" /> <!-- يفضل وضع صورة للموقع لاحقاً -->
+  <meta property="og:image" content="https://truth-analyzero-1.vercel.app/og-image.jpg" />
 
-  <!-- خطوط جوجل -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link
-    href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Inter:wght@400;600;800&display=swap"
-    rel="stylesheet"
-  />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
   
-  <!-- ملف التصميم -->
   <link rel="stylesheet" href="style.css" />
-
-  <!-- مكتبة تحويل التقرير إلى صورة -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
-  <!-- ================= HEADER ================= -->
   <header class="site-header">
     <div class="container header-inner">
       <a href="#" class="brand">
         <span class="brand-icon" aria-hidden="true">🔍</span>
         <span class="brand-text" data-i18n="brand">محلل النبرة</span>
       </a>
-      <button
-        id="langToggle"
-        class="lang-toggle"
-        type="button"
-        aria-label="Switch language"
-      >
+      <button id="langToggle" class="lang-toggle" type="button" aria-label="Switch language">
         <span class="lang-current" id="langCurrent">AR</span>
         <span class="lang-divider">/</span>
         <span class="lang-other">EN</span>
@@ -52,7 +37,6 @@
     </div>
   </header>
 
-  <!-- ================= HERO ================= -->
   <section class="hero container">
     <h1 class="hero-title" data-i18n="hero_title">اكشف نوايا الطرف الآخر</h1>
     <p class="hero-subtitle" data-i18n="hero_subtitle">
@@ -60,28 +44,12 @@
     </p>
   </section>
 
-  <!-- ================= MAIN ================= -->
   <main class="container">
-
-    <!-- Analyzer Card -->
     <section class="analyzer-card" id="analyzerCard">
-      <label for="messageInput" class="field-label" data-i18n="input_label">
-        النص المراد تحليله
-      </label>
+      <label for="messageInput" class="field-label" data-i18n="input_label">النص المراد تحليله</label>
+      <textarea id="messageInput" class="message-input" data-i18n-placeholder="input_placeholder" placeholder="ألصق الرسالة أو المحادثة هنا لفحصها..." maxlength="2000" rows="1"></textarea>
+      <div class="char-counter"><span id="charCount">0</span> / 2000</div>
 
-      <textarea
-        id="messageInput"
-        class="message-input"
-        data-i18n-placeholder="input_placeholder"
-        placeholder="ألصق الرسالة أو المحادثة هنا لفحصها..."
-        maxlength="2000"
-        rows="1"
-      ></textarea>
-      <div class="char-counter">
-        <span id="charCount">0</span> / 2000
-      </div>
-
-      <!-- 🌟 9. زر رفع صورة المحادثة -->
       <div class="image-upload-section" style="margin-bottom: 20px; text-align: center;">
         <input type="file" id="imageInput" accept="image/*" style="display: none;">
         <button type="button" id="uploadImageBtn" class="tag" style="width: 100%; border-style: dashed;">
@@ -100,42 +68,30 @@
         </div>
       </div>
 
-      <!-- حقل السؤال الإضافي -->
       <div class="question-section" style="margin-bottom: 24px;">
         <label for="questionInput" class="field-label" data-i18n="question_label">هل لديك سؤال حول النص؟ (اختياري)</label>
-        <input 
-          type="text" 
-          id="questionInput" 
-          class="question-input" 
-          placeholder="مثال: هل هذا الشخص يهددني؟ أو كيف أرد عليه؟" 
-          data-i18n-placeholder="question_placeholder"
-        >
+        <input type="text" id="questionInput" class="question-input" placeholder="مثال: هل هذا الشخص يهددني؟ أو كيف أرد عليه؟" data-i18n-placeholder="question_placeholder">
       </div>
 
-      <button id="analyzeBtn" class="cta-btn" type="button" data-i18n="cta_button">
-        ابدأ التحليل السري الآن
-      </button>
-
-      <p class="consent-note" data-i18n="consent_note">
-        بضغطك على التحليل توافق على إرسال النص لخدمة تحليل خارجية.
-      </p>
+      <button id="analyzeBtn" class="cta-btn" type="button" data-i18n="cta_button">ابدأ التحليل السري الآن</button>
+      <p class="consent-note" data-i18n="consent_note">بضغطك على التحليل توافق على إرسال النص لخدمة تحليل خارجية.</p>
     </section>
 
-    <!-- Loading State -->
     <section class="loading-box" id="loadingBox" hidden>
       <div class="loading-spinner" aria-hidden="true"></div>
-      <p class="loading-text" id="loadingText" data-i18n="loading_1">
-        جاري فحص النبرة...
-      </p>
+      <p class="loading-text" id="loadingText" data-i18n="loading_1">جاري فحص النبرة...</p>
     </section>
 
-    <!-- Result Card -->
     <section class="result-card" id="resultCard" hidden>
       <div class="result-header">
         <h2 data-i18n="result_title">تقرير التحليل</h2>
-        <button id="resetBtn" class="reset-btn" type="button" data-i18n="result_reset">
-          تحليل جديد
-        </button>
+        <button id="resetBtn" class="reset-btn" type="button" data-i18n="result_reset">تحليل جديد</button>
+      </div>
+
+      <!-- 🌟 كتلة اللهجة الجديدة -->
+      <div class="result-block">
+        <h3 data-i18n="result_dialect">اللهجة والمنطقة 🗣️</h3>
+        <p id="resultDialect" class="result-text"></p>
       </div>
 
       <div class="result-block">
@@ -168,69 +124,44 @@
         <p id="resultSummary" class="result-text"></p>
       </div>
 
-      <!-- قسم إجابة السؤال -->
       <div class="result-block" id="resultAnswerBlock" hidden>
         <h3 data-i18n="result_answer_title">إجابة سؤالك</h3>
         <p id="resultAnswer" class="result-text" style="border-right-color: var(--success); color: var(--success);"></p>
       </div>
 
-      <p class="result-disclaimer" data-i18n="result_disclaimer">
-        ⚠️ هذا تحليل لغوي تعليمي، وليس دليلًا على الصدق أو الكذب.
-      </p>
+      <p class="result-disclaimer" data-i18n="result_disclaimer">⚠️ هذا تحليل لغوي تعليمي، وليس دليلًا على الصدق أو الكذب.</p>
 
-      <!-- أزرار الإجراءات -->
       <div class="result-actions" style="display: flex; flex-direction: column; gap: 10px;">
-        
-        <!-- 🌟 4 و 2. أزرار النسخ والواتساب -->
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
           <button id="copyBtn" class="copy-btn" type="button" data-i18n="result_copy" style="flex: 1;">نسخ النتيجة 📋</button>
           <button id="whatsappBtn" class="wa-btn" type="button" data-i18n="result_whatsapp" style="flex: 1;">مشاركة واتساب 💬</button>
         </div>
-
-        <!-- 🌟 1. زر التحميل كصورة -->
-        <button id="downloadBtn" class="download-btn" type="button" data-i18n="result_download">
-          تحميل النتيجة كصورة 📸
-        </button>
-        
-        <!-- زر المشاركة القديم (نسخ الرابط) -->
-        <button id="shareBtn" class="share-btn" type="button" data-i18n="result_share">
-          نسخ رابط الموقع
-        </button>
+        <button id="downloadBtn" class="download-btn" type="button" data-i18n="result_download">تحميل النتيجة كصورة 📸</button>
+        <button id="shareBtn" class="share-btn" type="button" data-i18n="result_share">نسخ رابط الموقع</button>
       </div>
     </section>
 
-    <!-- 🌟 3. سجل التحليلات السابقة (History) -->
     <section id="historySection" class="result-card" hidden style="margin-top: 30px; border-color: var(--border);">
       <div class="result-header">
         <h2 data-i18n="history_title">سجل التحليلات السابقة</h2>
       </div>
       <div id="historyList" class="result-list"></div>
     </section>
-
   </main>
 
-  <!-- ================= FOOTER ================= -->
   <footer class="site-footer">
     <div class="container footer-inner">
       <p style="text-align: center; margin-top: 10px;">
-        
-      <p style="text-align: center; margin-top: 10px;">
-  <span data-i18n="footer_copy">© 2026 جميع الحقوق محفوظة لدى </span>
-  <a href="tel:773468764" class="company-link" data-i18n="company_name">شركة القدسي سوفت</a>
+        <span data-i18n="footer_copy">© 2026 جميع الحقوق محفوظة لدى </span>
+        <a href="tel:773468764" class="company-link" data-i18n="company_name">شركة القدسي سوفت</a>
       </p>
-      
       <div class="footer-links">
-        <button type="button" class="link-btn" data-modal="privacyModal" data-i18n="footer_privacy">
-          سياسة الخصوصية
-        </button>
-        <button type="button" class="link-btn" data-modal="disclaimerModal" data-i18n="footer_disclaimer">
-          إخلاء المسؤولية
-        </button>
+        <button type="button" class="link-btn" data-modal="privacyModal" data-i18n="footer_privacy">سياسة الخصوصية</button>
+        <button type="button" class="link-btn" data-modal="disclaimerModal" data-i18n="footer_disclaimer">إخلاء المسؤولية</button>
       </div>
     </div>
   </footer>
 
-  <!-- ================= MODAL: Privacy ================= -->
   <div class="modal" id="privacyModal" hidden>
     <div class="modal-content">
       <button type="button" class="modal-close" data-close="privacyModal" aria-label="Close">✕</button>
@@ -244,7 +175,6 @@
     </div>
   </div>
 
-  <!-- ================= MODAL: Disclaimer ================= -->
   <div class="modal" id="disclaimerModal" hidden>
     <div class="modal-content">
       <button type="button" class="modal-close" data-close="disclaimerModal" aria-label="Close">✕</button>
@@ -260,4 +190,4 @@
 
   <script src="script.js"></script>
 </body>
-</html>
+  </html>
