@@ -1325,3 +1325,10 @@ a:focus-visible {
     gap: 7px;
   }
    }
+
+/* 🌟 إصلاح مشكلة اختفاء النص أثناء تحميل الصورة */
+.result-card.capturing .result-block {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+  animation: none !important;
+}
