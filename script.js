@@ -27,7 +27,7 @@ const translations = {
     result_summary: "الخلاصة",
     result_disclaimer: "⚠️ هذا تحليل لغوي تعليمي، وليس دليلًا على الصدق أو الكذب.",
     result_share: "شارك النتيجة مع أصدقائك",
-    footer_copy: "© 2026 محلل النبرة. جميع الحقوق محفوظة.",
+    footer_copy: "© 2026 محلل النبرة. جميع الحقوق محفوظة لدى شركة القدسي سوفت .",
     footer_privacy: "سياسة الخصوصية",
     footer_disclaimer: "إخلاء المسؤولية",
     privacy_title: "سياسة الخصوصية",
@@ -94,7 +94,23 @@ const translations = {
 
 let currentLang = 'ar';
 
-// ================= دالة الإشعارات الأنيقة =================
+// ================= 1. التبديل التلقائي بين الوضع النهاري والليلي =================
+function setThemeByTime() {
+  const hour = new Date().getHours();
+  // من 6 صباحاً حتى 6 مساءً (النهار)
+  const isDayTime = hour >= 6 && hour < 18;
+
+  if (isDayTime) {
+    document.body.classList.add('light-mode');
+  } else {
+    document.body.classList.remove('light-mode');
+  }
+}
+
+// تشغيل الوضع التلقائي فور تحميل الصفحة
+setThemeByTime();
+
+// ================= 2. دالة الإشعارات الأنيقة (Toast) =================
 function showToast(message, isError = false) {
   let container = document.querySelector('.toast-container');
   if (!container) {
@@ -111,10 +127,10 @@ function showToast(message, isError = false) {
   setTimeout(() => {
     toast.style.animation = 'fadeOut 0.3s forwards';
     setTimeout(() => toast.remove(), 300);
-  }, 3000);
+  }, 3500);
 }
 
-// ================= دالة تغيير اللغة =================
+// ================= 3. دالة تغيير اللغة =================
 function toggleLanguage() {
   currentLang = currentLang === 'ar' ? 'en' : 'ar';
   const htmlTag = document.documentElement;
@@ -133,6 +149,7 @@ function toggleLanguage() {
     langOtherBtn.textContent = 'EN';
   }
 
+  // تحديث جميع النصوص
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (translations[currentLang][key]) {
@@ -140,6 +157,7 @@ function toggleLanguage() {
     }
   });
 
+  // تحديث placeholders
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');
     if (translations[currentLang][key]) {
@@ -150,7 +168,7 @@ function toggleLanguage() {
 
 document.getElementById('langToggle').addEventListener('click', toggleLanguage);
 
-// ================= عدّاد الأحرف وتكبير المربع تلقائياً =================
+// ================= 4. عدّاد الأحرف وتكبير المربع تلقائياً =================
 const messageInput = document.getElementById('messageInput');
 const charCount = document.getElementById('charCount');
 
@@ -173,7 +191,7 @@ messageInput.addEventListener('input', function() {
   }
 });
 
-// ================= تفعيل الأزرار (Tags) =================
+// ================= 5. تفعيل الأزرار (Tags) =================
 const tagButtons = document.querySelectorAll('.tag');
 tagButtons.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -182,7 +200,7 @@ tagButtons.forEach(btn => {
   });
 });
 
-// ================= فتح وإغلاق النوافذ المنبثقة =================
+// ================= 6. فتح وإغلاق النوافذ المنبثقة =================
 document.querySelectorAll('.link-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const modalId = btn.getAttribute('data-modal');
@@ -197,7 +215,7 @@ document.querySelectorAll('.modal-close').forEach(btn => {
   });
 });
 
-// ================= شاشة التحميل =================
+// ================= 7. شاشة التحميل =================
 let loadingInterval;
 const loadingTextElement = document.getElementById('loadingText');
 
@@ -215,7 +233,7 @@ function stopLoadingAnimation() {
   clearInterval(loadingInterval);
 }
 
-// ================= عرض النتائج =================
+// ================= 8. عرض النتائج =================
 function displayResults(data) {
   document.getElementById('resultTone').textContent = data.tone || '-';
 
@@ -256,12 +274,13 @@ function displayResults(data) {
 
   document.getElementById('resultSummary').textContent = data.summary || '-';
 
+  // إخفاء صندوق الإدخال وإظهار النتائج
   document.getElementById('analyzerCard').style.display = 'none';
   document.getElementById('loadingBox').hidden = true;
   document.getElementById('resultCard').hidden = false;
 }
 
-// ================= زر التحليل الرئيسي =================
+// ================= 9. زر التحليل الرئيسي =================
 document.getElementById('analyzeBtn').addEventListener('click', async () => {
   const text = messageInput.value.trim();
   
@@ -270,6 +289,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     return;
   }
 
+  // تجهيز واجهة المستخدم
   document.getElementById('analyzerCard').style.display = 'none';
   document.getElementById('resultCard').hidden = true;
   document.getElementById('loadingBox').hidden = false;
@@ -304,7 +324,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
   }
 });
 
-// ================= زر التحليل الجديد (إعادة تعيين) =================
+// ================= 10. زر التحليل الجديد (إعادة تعيين) =================
 document.getElementById('resetBtn').addEventListener('click', () => {
   messageInput.value = '';
   charCount.textContent = '0';
@@ -319,7 +339,7 @@ document.getElementById('resetBtn').addEventListener('click', () => {
   document.getElementById('analyzerCard').style.display = 'block';
 });
 
-// ================= زر المشاركة =================
+// ================= 11. زر المشاركة =================
 document.getElementById('shareBtn').addEventListener('click', () => {
   navigator.clipboard.writeText(window.location.href).then(() => {
     showToast(currentLang === 'ar' ? 'تم نسخ رابط الموقع بنجاح! 🎉 شاركه مع أصدقائك.' : 'Link copied successfully! 🎉 Share it with your friends.');
