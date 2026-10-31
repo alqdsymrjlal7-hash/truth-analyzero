@@ -22,6 +22,7 @@ const translations = {
     loading_image: "جاري استخراج النص من الصورة... ⏳",
     result_title: "تقرير التحليل",
     result_reset: "تحليل جديد",
+    result_dialect: "اللهجة والمنطقة 🗣️",
     result_tone: "النبرة العامة",
     result_confidence: "مؤشرات الثقة",
     result_hedging: "مؤشرات التهرب",
@@ -84,6 +85,7 @@ const translations = {
     loading_image: "Extracting text from image... ⏳",
     result_title: "Analysis Report",
     result_reset: "New Analysis",
+    result_dialect: "Dialect & Region 🗣️",
     result_tone: "General Tone",
     result_confidence: "Confidence Signals",
     result_hedging: "Hedging Signals",
@@ -127,7 +129,7 @@ const translations = {
 };
 
 let currentLang = 'ar';
-let currentAnalysisData = null; // لحفظ النتيجة الحالية
+let currentAnalysisData = null; 
 
 // ================= 1. تطبيق اللغة =================
 function applyLanguage() {
@@ -161,7 +163,7 @@ function applyLanguage() {
     }
   });
   
-  renderHistory(); // تحديث السجل عند تغيير اللغة
+  renderHistory(); 
 }
 
 function toggleLanguage() {
@@ -281,8 +283,10 @@ function stopLoadingAnimation() {
 
 // ================= 9. عرض النتائج =================
 function displayResults(data) {
-  currentAnalysisData = data; // حفظ البيانات للأزرار
+  currentAnalysisData = data; 
   
+  // 🌟 عرض اللهجة الجديد
+  document.getElementById('resultDialect').textContent = data.dialect || '-';
   document.getElementById('resultTone').textContent = data.tone || '-';
 
   const fillList = (elementId, items, emptyText) => {
@@ -365,7 +369,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     stopLoadingAnimation();
     displayResults(data);
     
-    // حفظ في السجل
     saveToHistory(text, data);
 
   } catch (error) {
@@ -382,7 +385,7 @@ document.getElementById('resetBtn').addEventListener('click', () => {
   messageInput.value = '';
   questionInput.value = '';
   charCount.textContent = '0';
-  messageInput.style.height = '130px'; // القيمة الافتراضية في CSS
+  messageInput.style.height = '130px'; 
   messageInput.style.overflowY = 'hidden';
   tagButtons.forEach(b => b.classList.remove('active'));
   document.getElementById('resultCard').hidden = true;
@@ -399,6 +402,7 @@ document.getElementById('copyBtn').addEventListener('click', () => {
   const d = currentAnalysisData;
   const textToCopy = `
 ${translations[currentLang].result_title}:
+${translations[currentLang].result_dialect}: ${d.dialect}
 ${translations[currentLang].result_tone}: ${d.tone}
 ${translations[currentLang].result_summary}: ${d.summary}
 ${d.answer ? translations[currentLang].result_answer_title + ': ' + d.answer : ''}
@@ -420,7 +424,7 @@ document.getElementById('whatsappBtn').addEventListener('click', () => {
   window.open(`https://wa.me/?text=${waText}`, '_blank');
 });
 
-// زر نسخ رابط الموقع (القديم)
+// زر نسخ رابط الموقع
 document.getElementById('shareBtn').addEventListener('click', () => {
   navigator.clipboard.writeText(window.location.href).then(() => {
     showToast(translations[currentLang].toast_share_success);
@@ -438,12 +442,10 @@ document.getElementById('downloadBtn').addEventListener('click', () => {
   downloadBtn.textContent = currentLang === 'ar' ? 'جاري تجهيز الصورة... ⏳' : 'Generating Image... ⏳';
   downloadBtn.disabled = true;
 
-  // إخفاء الأزرار مؤقتاً من الصورة
   const actionsDiv = document.querySelector('.result-actions');
   const originalActionsDisplay = actionsDiv.style.display;
   actionsDiv.style.display = 'none';
   
-  // إخفاء زر التحليل الجديد
   const resetBtn = document.getElementById('resetBtn');
   resetBtn.style.display = 'none';
 
@@ -452,7 +454,7 @@ document.getElementById('downloadBtn').addEventListener('click', () => {
   html2canvas(resultCard, {
     scale: 2, 
     useCORS: true,
-    backgroundColor: '#080d18' // لون الخلفية الداكن في التصميم الجديد
+    backgroundColor: '#080d18'
   }).then(canvas => {
     resultCard.classList.remove('capturing');
     actionsDiv.style.display = originalActionsDisplay;
@@ -485,11 +487,11 @@ function saveToHistory(text, data) {
     id: Date.now(),
     snippet: text.substring(0, 50) + (text.length > 50 ? '...' : ''),
     date: new Date().toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }),
-    fullData: data // حفظ التقرير كاملاً للرجوع إليه
+    fullData: data
   };
   
-  history.unshift(newItem); // إضافة في البداية
-  if (history.length > 5) history.pop(); // نحتفظ بآخر 5 فقط
+  history.unshift(newItem);
+  if (history.length > 5) history.pop();
   
   localStorage.setItem('nexusHistory', JSON.stringify(history));
   renderHistory();
@@ -515,7 +517,6 @@ function renderHistory() {
       <div class="history-date">${item.date}</div>
     `;
     li.addEventListener('click', () => {
-      // عند الضغط على السجل، نعيد عرض النتيجة
       document.getElementById('analyzerCard').style.display = 'none';
       displayResults(item.fullData);
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -524,7 +525,6 @@ function renderHistory() {
   });
 }
 
-// تحميل السجل فور فتح الصفحة
 renderHistory();
 
 // ================= 14. ميزة رفع الصورة (OCR) =================
@@ -532,7 +532,6 @@ const imageInput = document.getElementById('imageInput');
 const uploadImageBtn = document.getElementById('uploadImageBtn');
 const imageName = document.getElementById('imageName');
 
-// ربط زر الرفع بحقل الملف المخفي
 uploadImageBtn.addEventListener('click', () => {
   imageInput.click();
 });
@@ -541,11 +540,9 @@ imageInput.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
 
-  // إظهار اسم الملف
   imageName.textContent = file.name;
   imageName.style.display = 'block';
   
-  // تحميل مكتبة Tesseract.js ديناميكياً إذا لم تكن موجودة
   if (typeof Tesseract === 'undefined') {
     showToast(currentLang === 'ar' ? 'جاري تحميل أدوات قراءة الصور...' : 'Loading OCR tools...');
     await new Promise((resolve, reject) => {
@@ -562,7 +559,6 @@ imageInput.addEventListener('change', async (e) => {
   startLoadingAnimation(translations[currentLang].loading_image);
 
   try {
-    // استخدام Tesseract لاستخراج النص (يدعم العربية والإنجليزية)
     const result = await Tesseract.recognize(file, currentLang === 'ar' ? 'ara+eng' : 'eng+ara');
     const extractedText = result.data.text.trim();
     
@@ -572,7 +568,7 @@ imageInput.addEventListener('change', async (e) => {
     
     if (extractedText.length > 5) {
       messageInput.value = extractedText;
-      messageInput.dispatchEvent(new Event('input')); // لتحديث العداد وتكبير المربع
+      messageInput.dispatchEvent(new Event('input'));
       showToast(currentLang === 'ar' ? 'تم استخراج النص بنجاح!' : 'Text extracted successfully!');
     } else {
       showToast(translations[currentLang].error_image, true);
