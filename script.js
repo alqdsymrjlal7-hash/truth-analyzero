@@ -19,6 +19,7 @@ const translations = {
     loading_1: "جاري فحص النبرة...",
     loading_2: "تحليل العلامات النصية...",
     loading_3: "مقارنة الأنماط اللغوية...",
+    loading_image: "جاري استخراج النص من الصورة... ⏳",
     result_title: "تقرير التحليل",
     result_reset: "تحليل جديد",
     result_tone: "النبرة العامة",
@@ -29,7 +30,12 @@ const translations = {
     result_summary: "الخلاصة",
     result_answer_title: "إجابة سؤالك",
     result_disclaimer: "⚠️ هذا تحليل لغوي تعليمي، وليس دليلًا على الصدق أو الكذب.",
-    result_share: "شارك النتيجة مع أصدقائك",
+    result_copy: "نسخ النتيجة 📋",
+    result_whatsapp: "مشاركة واتساب 💬",
+    result_download: "تحميل النتيجة كصورة 📸",
+    result_share: "نسخ رابط الموقع",
+    history_title: "سجل التحليلات السابقة",
+    history_empty: "لا توجد تحليلات سابقة.",
     footer_copy: "© 2026 جميع الحقوق محفوظة لدى ",
     company_name: "شركة القدسي سوفت",
     footer_privacy: "سياسة الخصوصية",
@@ -46,8 +52,15 @@ const translations = {
     disclaimer_body_4: "استخدامك للأداة على مسؤوليتك الشخصية.",
     error_empty: "الرجاء إدخال نص أولاً.",
     error_api: "عذراً، حدث خطأ أثناء الاتصال بالخادم. تأكد من تشغيل السيرفر.",
+    error_image: "تعذر قراءة الصورة، يرجى التأكد من وضوح النص.",
     no_patterns: "لم يتم اكتشاف أنماط تلاعب واضحة.",
-    no_signals: "لا توجد مؤشرات واضحة."
+    no_signals: "لا توجد مؤشرات واضحة.",
+    toast_copied: "تم نسخ النتيجة بنجاح! 📋",
+    toast_no_result: "لا توجد نتيجة للنسخ.",
+    toast_image_ready: "تم تحميل الصورة بنجاح! 📸",
+    toast_image_fail: "فشل تحميل الصورة.",
+    toast_share_success: "تم نسخ رابط الموقع بنجاح! 🎉",
+    toast_share_fail: "فشل نسخ الرابط"
   },
   en: {
     page_title: "Tone Analyzer",
@@ -68,6 +81,7 @@ const translations = {
     loading_1: "Scanning tone...",
     loading_2: "Analyzing text markers...",
     loading_3: "Comparing language patterns...",
+    loading_image: "Extracting text from image... ⏳",
     result_title: "Analysis Report",
     result_reset: "New Analysis",
     result_tone: "General Tone",
@@ -78,7 +92,12 @@ const translations = {
     result_summary: "Summary",
     result_answer_title: "Answer to your question",
     result_disclaimer: "⚠️ This is an educational linguistic analysis, not evidence of truthfulness.",
-    result_share: "Share Results with Friends",
+    result_copy: "Copy Result 📋",
+    result_whatsapp: "Share on WhatsApp 💬",
+    result_download: "Download Result as Image 📸",
+    result_share: "Copy Site Link",
+    history_title: "Previous Analyses",
+    history_empty: "No previous analyses.",
     footer_copy: "© 2026 All rights reserved to ",
     company_name: "Al-Qudsi Soft",
     footer_privacy: "Privacy Policy",
@@ -95,15 +114,22 @@ const translations = {
     disclaimer_body_4: "Your use of the tool is at your own risk.",
     error_empty: "Please enter some text first.",
     error_api: "Sorry, an error occurred while connecting to the server. Make sure the server is running.",
+    error_image: "Could not read the image, please ensure text is clear.",
     no_patterns: "No clear manipulation patterns detected.",
-    no_signals: "No clear signals found."
+    no_signals: "No clear signals found.",
+    toast_copied: "Result copied successfully! 📋",
+    toast_no_result: "No result to copy.",
+    toast_image_ready: "Image downloaded successfully! 📸",
+    toast_image_fail: "Failed to download image.",
+    toast_share_success: "Link copied successfully! 🎉",
+    toast_share_fail: "Failed to copy link"
   }
 };
 
-// اللغة الافتراضية في حال فشل كل شيء
 let currentLang = 'ar';
+let currentAnalysisData = null; // لحفظ النتيجة الحالية
 
-// ================= 1. دالة تطبيق اللغة على الصفحة =================
+// ================= 1. تطبيق اللغة =================
 function applyLanguage() {
   const htmlTag = document.documentElement;
   const langToggleBtn = document.getElementById('langCurrent');
@@ -121,7 +147,6 @@ function applyLanguage() {
     langOtherBtn.textContent = 'EN';
   }
 
-  // تحديث النصوص
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (translations[currentLang][key]) {
@@ -129,27 +154,25 @@ function applyLanguage() {
     }
   });
 
-  // تحديث placeholders
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');
     if (translations[currentLang][key]) {
       el.setAttribute('placeholder', translations[currentLang][key]);
     }
   });
+  
+  renderHistory(); // تحديث السجل عند تغيير اللغة
 }
 
-// ================= 2. التبديل اليدوي للغة =================
 function toggleLanguage() {
   currentLang = currentLang === 'ar' ? 'en' : 'ar';
   applyLanguage();
 }
 document.getElementById('langToggle').addEventListener('click', toggleLanguage);
 
-// ================= 3. الكشف التلقائي عن لغة المستخدم 🌟 =================
+// ================= 2. الكشف التلقائي عن اللغة =================
 async function autoDetectLanguage() {
-  // الخطوة الأولى: فحص لغة جهاز المستخدم (Browser Language) - أسرع وأدق
   const browserLang = navigator.language || navigator.userLanguage;
-  
   if (browserLang.startsWith('ar')) {
     currentLang = 'ar';
     return applyLanguage();
@@ -158,31 +181,19 @@ async function autoDetectLanguage() {
     return applyLanguage();
   }
 
-  // الخطوة الثانية: إذا كانت لغة المتصفح غير عربية أو إنجليزية (مثلاً فرنسي)، نفحص الـ IP
   try {
     const response = await fetch('https://ipapi.co/json/');
     const data = await response.json();
-    
-    // قائمة رموز الدول العربية
     const arabicCountries = ['SA', 'YE', 'EG', 'AE', 'QA', 'KW', 'BH', 'OM', 'JO', 'LB', 'SY', 'IQ', 'PS', 'SD', 'LY', 'TN', 'DZ', 'MA', 'MR', 'SO', 'DJ', 'KM'];
-    
-    if (arabicCountries.includes(data.country_code)) {
-      currentLang = 'ar';
-    } else {
-      currentLang = 'en'; // إذا كان من أي دولة أجنبية
-    }
+    currentLang = arabicCountries.includes(data.country_code) ? 'ar' : 'en';
   } catch (error) {
-    console.error('IP detection failed:', error);
-    currentLang = 'en'; // لغة افتراضية في حال فشل الاتصال بمزود الـ IP
+    currentLang = 'en';
   }
-  
   applyLanguage();
 }
-
-// تشغيل الكشف التلقائي فور تحميل الصفحة
 autoDetectLanguage();
 
-// ================= 4. التبديل التلقائي بين الوضع النهاري والليلي =================
+// ================= 3. الوضع الليلي والنهاري =================
 function setThemeByTime() {
   const hour = new Date().getHours();
   const isDayTime = hour >= 6 && hour < 18;
@@ -194,7 +205,7 @@ function setThemeByTime() {
 }
 setThemeByTime();
 
-// ================= 5. دالة الإشعارات =================
+// ================= 4. دالة الإشعارات =================
 function showToast(message, isError = false) {
   let container = document.querySelector('.toast-container');
   if (!container) {
@@ -212,20 +223,20 @@ function showToast(message, isError = false) {
   }, 3500);
 }
 
-// ================= 6. عدّاد الأحرف وتكبير المربع =================
+// ================= 5. الحقول وتكبير المربع =================
 const messageInput = document.getElementById('messageInput');
 const questionInput = document.getElementById('questionInput');
 const charCount = document.getElementById('charCount');
 
 messageInput.addEventListener('input', function() {
   charCount.textContent = this.value.length;
-  this.style.height = '80px'; 
+  this.style.height = 'auto'; 
   const newHeight = Math.min(this.scrollHeight, 300);
   this.style.height = newHeight + 'px';
   this.style.overflowY = this.scrollHeight > 300 ? 'auto' : 'hidden';
 });
 
-// ================= 7. تفعيل الأزرار (Tags) =================
+// ================= 6. تفعيل الأزرار (Tags) =================
 const tagButtons = document.querySelectorAll('.tag');
 tagButtons.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -234,7 +245,7 @@ tagButtons.forEach(btn => {
   });
 });
 
-// ================= 8. النوافذ المنبثقة =================
+// ================= 7. النوافذ المنبثقة =================
 document.querySelectorAll('.link-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const modalId = btn.getAttribute('data-modal');
@@ -248,24 +259,30 @@ document.querySelectorAll('.modal-close').forEach(btn => {
   });
 });
 
-// ================= 9. شاشة التحميل =================
+// ================= 8. شاشة التحميل =================
 let loadingInterval;
 const loadingTextElement = document.getElementById('loadingText');
 
-function startLoadingAnimation() {
+function startLoadingAnimation(customText = null) {
   let step = 1;
-  loadingTextElement.textContent = translations[currentLang].loading_1;
-  loadingInterval = setInterval(() => {
-    step = step === 1 ? 2 : (step === 2 ? 3 : 1);
-    loadingTextElement.textContent = translations[currentLang][`loading_${step}`];
-  }, 1500);
+  if (customText) {
+    loadingTextElement.textContent = customText;
+  } else {
+    loadingTextElement.textContent = translations[currentLang].loading_1;
+    loadingInterval = setInterval(() => {
+      step = step === 1 ? 2 : (step === 2 ? 3 : 1);
+      loadingTextElement.textContent = translations[currentLang][`loading_${step}`];
+    }, 1500);
+  }
 }
 function stopLoadingAnimation() {
   clearInterval(loadingInterval);
 }
 
-// ================= 10. عرض النتائج =================
+// ================= 9. عرض النتائج =================
 function displayResults(data) {
+  currentAnalysisData = data; // حفظ البيانات للأزرار
+  
   document.getElementById('resultTone').textContent = data.tone || '-';
 
   const fillList = (elementId, items, emptyText) => {
@@ -317,7 +334,7 @@ function displayResults(data) {
   document.getElementById('resultCard').hidden = false;
 }
 
-// ================= 11. زر التحليل =================
+// ================= 10. زر التحليل الرئيسي =================
 document.getElementById('analyzeBtn').addEventListener('click', async () => {
   const text = messageInput.value.trim();
   const question = questionInput.value.trim();
@@ -347,6 +364,9 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     const data = await response.json();
     stopLoadingAnimation();
     displayResults(data);
+    
+    // حفظ في السجل
+    saveToHistory(text, data);
 
   } catch (error) {
     console.error(error);
@@ -357,24 +377,211 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
   }
 });
 
-// ================= 12. زر التحليل الجديد =================
+// ================= 11. زر التحليل الجديد =================
 document.getElementById('resetBtn').addEventListener('click', () => {
   messageInput.value = '';
   questionInput.value = '';
   charCount.textContent = '0';
-  messageInput.style.height = '80px';
+  messageInput.style.height = '130px'; // القيمة الافتراضية في CSS
   messageInput.style.overflowY = 'hidden';
   tagButtons.forEach(b => b.classList.remove('active'));
   document.getElementById('resultCard').hidden = true;
   document.getElementById('analyzerCard').style.display = 'block';
+  currentAnalysisData = null;
 });
 
-// ================= 13. زر المشاركة =================
+// ================= 12. أزرار النسخ والمشاركة والتحميل =================
+
+// زر نسخ النتيجة
+document.getElementById('copyBtn').addEventListener('click', () => {
+  if (!currentAnalysisData) return showToast(translations[currentLang].toast_no_result, true);
+  
+  const d = currentAnalysisData;
+  const textToCopy = `
+${translations[currentLang].result_title}:
+${translations[currentLang].result_tone}: ${d.tone}
+${translations[currentLang].result_summary}: ${d.summary}
+${d.answer ? translations[currentLang].result_answer_title + ': ' + d.answer : ''}
+  `.trim();
+
+  navigator.clipboard.writeText(textToCopy).then(() => {
+    showToast(translations[currentLang].toast_copied);
+  }).catch(() => {
+    showToast('Error', true);
+  });
+});
+
+// زر الواتساب
+document.getElementById('whatsappBtn').addEventListener('click', () => {
+  if (!currentAnalysisData) return;
+  const summary = currentAnalysisData.summary || '';
+  const siteUrl = window.location.href;
+  const waText = encodeURIComponent(`${translations[currentLang].result_summary}: ${summary}\n\n${translations[currentLang].brand}: ${siteUrl}`);
+  window.open(`https://wa.me/?text=${waText}`, '_blank');
+});
+
+// زر نسخ رابط الموقع (القديم)
 document.getElementById('shareBtn').addEventListener('click', () => {
   navigator.clipboard.writeText(window.location.href).then(() => {
-    showToast(currentLang === 'ar' ? 'تم نسخ رابط الموقع بنجاح! 🎉 شاركه مع أصدقائك.' : 'Link copied successfully! 🎉 Share it with your friends.');
+    showToast(translations[currentLang].toast_share_success);
   }).catch(err => {
-    console.error('Failed to copy: ', err);
-    showToast(currentLang === 'ar' ? 'فشل نسخ الرابط' : 'Failed to copy link', true);
+    showToast(translations[currentLang].toast_share_fail, true);
   });
+});
+
+// زر تحميل الصورة
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  const resultCard = document.getElementById('resultCard');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const originalText = downloadBtn.textContent;
+
+  downloadBtn.textContent = currentLang === 'ar' ? 'جاري تجهيز الصورة... ⏳' : 'Generating Image... ⏳';
+  downloadBtn.disabled = true;
+
+  // إخفاء الأزرار مؤقتاً من الصورة
+  const actionsDiv = document.querySelector('.result-actions');
+  const originalActionsDisplay = actionsDiv.style.display;
+  actionsDiv.style.display = 'none';
+  
+  // إخفاء زر التحليل الجديد
+  const resetBtn = document.getElementById('resetBtn');
+  resetBtn.style.display = 'none';
+
+  resultCard.classList.add('capturing');
+
+  html2canvas(resultCard, {
+    scale: 2, 
+    useCORS: true,
+    backgroundColor: '#080d18' // لون الخلفية الداكن في التصميم الجديد
+  }).then(canvas => {
+    resultCard.classList.remove('capturing');
+    actionsDiv.style.display = originalActionsDisplay;
+    resetBtn.style.display = '';
+    downloadBtn.textContent = originalText;
+    downloadBtn.disabled = false;
+
+    const image = canvas.toDataURL("image/png");
+    const link = document.createElement('a');
+    link.href = image;
+    link.download = `Truth-Analyzer-${Date.now()}.png`;
+    link.click();
+    
+    showToast(translations[currentLang].toast_image_ready);
+  }).catch(err => {
+    console.error(err);
+    resultCard.classList.remove('capturing');
+    actionsDiv.style.display = originalActionsDisplay;
+    resetBtn.style.display = '';
+    downloadBtn.textContent = originalText;
+    downloadBtn.disabled = false;
+    showToast(translations[currentLang].toast_image_fail, true);
+  });
+});
+
+// ================= 13. نظام سجل التحليلات (History) =================
+function saveToHistory(text, data) {
+  let history = JSON.parse(localStorage.getItem('nexusHistory')) || [];
+  const newItem = {
+    id: Date.now(),
+    snippet: text.substring(0, 50) + (text.length > 50 ? '...' : ''),
+    date: new Date().toLocaleString(currentLang === 'ar' ? 'ar-EG' : 'en-US', { hour: '2-digit', minute: '2-digit', day: '2-digit', month: '2-digit' }),
+    fullData: data // حفظ التقرير كاملاً للرجوع إليه
+  };
+  
+  history.unshift(newItem); // إضافة في البداية
+  if (history.length > 5) history.pop(); // نحتفظ بآخر 5 فقط
+  
+  localStorage.setItem('nexusHistory', JSON.stringify(history));
+  renderHistory();
+}
+
+function renderHistory() {
+  const historySection = document.getElementById('historySection');
+  const historyList = document.getElementById('historyList');
+  let history = JSON.parse(localStorage.getItem('nexusHistory')) || [];
+
+  if (history.length === 0) {
+    historySection.hidden = true;
+    return;
+  }
+
+  historySection.hidden = false;
+  historyList.innerHTML = '';
+  
+  history.forEach(item => {
+    const li = document.createElement('li');
+    li.innerHTML = `
+      <div class="history-snippet">${item.snippet}</div>
+      <div class="history-date">${item.date}</div>
+    `;
+    li.addEventListener('click', () => {
+      // عند الضغط على السجل، نعيد عرض النتيجة
+      document.getElementById('analyzerCard').style.display = 'none';
+      displayResults(item.fullData);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+    historyList.appendChild(li);
+  });
+}
+
+// تحميل السجل فور فتح الصفحة
+renderHistory();
+
+// ================= 14. ميزة رفع الصورة (OCR) =================
+const imageInput = document.getElementById('imageInput');
+const uploadImageBtn = document.getElementById('uploadImageBtn');
+const imageName = document.getElementById('imageName');
+
+// ربط زر الرفع بحقل الملف المخفي
+uploadImageBtn.addEventListener('click', () => {
+  imageInput.click();
+});
+
+imageInput.addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // إظهار اسم الملف
+  imageName.textContent = file.name;
+  imageName.style.display = 'block';
+  
+  // تحميل مكتبة Tesseract.js ديناميكياً إذا لم تكن موجودة
+  if (typeof Tesseract === 'undefined') {
+    showToast(currentLang === 'ar' ? 'جاري تحميل أدوات قراءة الصور...' : 'Loading OCR tools...');
+    await new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+      script.onload = resolve;
+      script.onerror = reject;
+      document.head.appendChild(script);
+    });
+  }
+
+  document.getElementById('analyzerCard').style.display = 'none';
+  document.getElementById('loadingBox').hidden = false;
+  startLoadingAnimation(translations[currentLang].loading_image);
+
+  try {
+    // استخدام Tesseract لاستخراج النص (يدعم العربية والإنجليزية)
+    const result = await Tesseract.recognize(file, currentLang === 'ar' ? 'ara+eng' : 'eng+ara');
+    const extractedText = result.data.text.trim();
+    
+    stopLoadingAnimation();
+    document.getElementById('loadingBox').hidden = true;
+    document.getElementById('analyzerCard').style.display = 'block';
+    
+    if (extractedText.length > 5) {
+      messageInput.value = extractedText;
+      messageInput.dispatchEvent(new Event('input')); // لتحديث العداد وتكبير المربع
+      showToast(currentLang === 'ar' ? 'تم استخراج النص بنجاح!' : 'Text extracted successfully!');
+    } else {
+      showToast(translations[currentLang].error_image, true);
+    }
+  } catch (err) {
+    console.error(err);
+    stopLoadingAnimation();
+    document.getElementById('loadingBox').hidden = true;
+    document.getElementById('analyzerCard').style.display = 'block';
+    showToast(translations[currentLang].error_image, true);
+  }
 });
