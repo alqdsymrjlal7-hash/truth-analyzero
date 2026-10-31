@@ -5,13 +5,30 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="أداة تحليل النبرة النصية لأنماط التواصل والتلاعب العاطفي" />
   <title data-i18n="page_title">محلل النبرة النصية</title>
+  
+  <!-- 🌟 5. أيقونة الموقع (Favicon) -->
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
+
+  <!-- 🌟 6. وسوم Open Graph للظهور في واتساب وتويتر -->
+  <meta property="og:title" content="محلل النبرة - اكشف نوايا الطرف الآخر" />
+  <meta property="og:description" content="ألصق الرسالة المشبوهة، ودع المحلل يكشف لك أنماط اللغة والتلاعب العاطفي في ثوانٍ." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://truth-analyzero-1.vercel.app" />
+  <meta property="og:image" content="https://truth-analyzero-1.vercel.app/og-image.jpg" /> <!-- يفضل وضع صورة للموقع لاحقاً -->
+
+  <!-- خطوط جوجل -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link
     href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Inter:wght@400;600;800&display=swap"
     rel="stylesheet"
   />
+  
+  <!-- ملف التصميم -->
   <link rel="stylesheet" href="style.css" />
+
+  <!-- مكتبة تحويل التقرير إلى صورة -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body>
 
@@ -64,6 +81,15 @@
         <span id="charCount">0</span> / 2000
       </div>
 
+      <!-- 🌟 9. زر رفع صورة المحادثة -->
+      <div class="image-upload-section" style="margin-bottom: 20px; text-align: center;">
+        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+        <button type="button" id="uploadImageBtn" class="tag" style="width: 100%; border-style: dashed;">
+          📷 أو قم برفع صورة محادثة لتحليلها
+        </button>
+        <p id="imageName" style="display: none; color: var(--success); font-size: 0.9rem; margin-top: 8px;"></p>
+      </div>
+
       <div class="tags-section">
         <p class="tags-label" data-i18n="tags_label">نوع العلاقة (اختياري):</p>
         <div class="tags" id="tagsGroup">
@@ -74,7 +100,7 @@
         </div>
       </div>
 
-      <!-- 🌟 حقل السؤال الإضافي -->
+      <!-- حقل السؤال الإضافي -->
       <div class="question-section" style="margin-bottom: 24px;">
         <label for="questionInput" class="field-label" data-i18n="question_label">هل لديك سؤال حول النص؟ (اختياري)</label>
         <input 
@@ -142,7 +168,7 @@
         <p id="resultSummary" class="result-text"></p>
       </div>
 
-      <!-- 🌟 قسم إجابة السؤال -->
+      <!-- قسم إجابة السؤال -->
       <div class="result-block" id="resultAnswerBlock" hidden>
         <h3 data-i18n="result_answer_title">إجابة سؤالك</h3>
         <p id="resultAnswer" class="result-text" style="border-right-color: var(--success); color: var(--success);"></p>
@@ -152,11 +178,33 @@
         ⚠️ هذا تحليل لغوي تعليمي، وليس دليلًا على الصدق أو الكذب.
       </p>
 
-      <div class="result-actions">
+      <!-- أزرار الإجراءات -->
+      <div class="result-actions" style="display: flex; flex-direction: column; gap: 10px;">
+        
+        <!-- 🌟 4 و 2. أزرار النسخ والواتساب -->
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <button id="copyBtn" class="copy-btn" type="button" data-i18n="result_copy" style="flex: 1;">نسخ النتيجة 📋</button>
+          <button id="whatsappBtn" class="wa-btn" type="button" data-i18n="result_whatsapp" style="flex: 1;">مشاركة واتساب 💬</button>
+        </div>
+
+        <!-- 🌟 1. زر التحميل كصورة -->
+        <button id="downloadBtn" class="download-btn" type="button" data-i18n="result_download">
+          تحميل النتيجة كصورة 📸
+        </button>
+        
+        <!-- زر المشاركة القديم (نسخ الرابط) -->
         <button id="shareBtn" class="share-btn" type="button" data-i18n="result_share">
-          شارك النتيجة مع أصدقائك
+          نسخ رابط الموقع
         </button>
       </div>
+    </section>
+
+    <!-- 🌟 3. سجل التحليلات السابقة (History) -->
+    <section id="historySection" class="result-card" hidden style="margin-top: 30px; border-color: var(--border);">
+      <div class="result-header">
+        <h2 data-i18n="history_title">سجل التحليلات السابقة</h2>
+      </div>
+      <div id="historyList" class="result-list"></div>
     </section>
 
   </main>
@@ -165,7 +213,8 @@
   <footer class="site-footer">
     <div class="container footer-inner">
       <p style="text-align: center; margin-top: 10px;">
-<!--الحقوق--> 
+        
+      
       <div class="footer-links">
         <button type="button" class="link-btn" data-modal="privacyModal" data-i18n="footer_privacy">
           سياسة الخصوصية
