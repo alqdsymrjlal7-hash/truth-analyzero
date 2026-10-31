@@ -41,7 +41,7 @@ body {
   overflow-x: hidden;
 }
 
-/* 🌟 اللمسة السحرية: هالات ضوئية متحركة في الخلفية */
+/* 🌟 الخلفية السحرية: هالات ضوئية متحركة */
 body::before, body::after {
   content: '';
   position: fixed;
@@ -90,7 +90,7 @@ html[dir="ltr"] body {
   padding: 0 20px;
 }
 
-/* ================= الهيدر ================= */
+/* ================= الهيدر (الرأس) ================= */
 .site-header {
   border-bottom: 1px solid var(--border);
   padding: 16px 0;
@@ -139,7 +139,7 @@ html[dir="ltr"] body {
 .lang-current { color: var(--accent-light); }
 .lang-divider { color: var(--text-muted); margin: 0 4px; }
 
-/* ================= القسم الرئيسي ================= */
+/* ================= القسم الرئيسي (Hero) ================= */
 .hero { text-align: center; margin: 40px auto 30px; }
 
 .hero-title {
@@ -179,6 +179,7 @@ html[dir="ltr"] body {
 
 .field-label { display: block; font-weight: 600; margin-bottom: 10px; color: var(--text-main); }
 
+/* 🌟 اللمسة السحرية: مربع نص صغير يكبر تلقائياً */
 .message-input {
   width: 100%;
   background: var(--bg-main);
@@ -188,15 +189,17 @@ html[dir="ltr"] body {
   color: var(--text-main);
   font-family: inherit;
   font-size: 1rem;
-  resize: vertical;
-  min-height: 150px;
-  transition: all 0.3s;
+  height: 80px; /* الحجم الابتدائي الصغير */
+  min-height: 80px;
+  overflow-y: hidden; /* إخفاء شريط التمرير في البداية */
+  resize: none; /* منع تغيير الحجم يدوياً */
+  transition: border-color 0.3s, box-shadow 0.3s, height 0.1s ease-out;
 }
 
 .message-input:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2), 0 0 15px rgba(139, 92, 246, 0.3);
 }
 
 .char-counter { text-align: left; font-size: 0.85rem; color: var(--text-muted); margin-top: 8px; margin-bottom: 20px; }
@@ -221,7 +224,7 @@ html[dir="rtl"] .char-counter { text-align: right; }
 .tag:hover { border-color: var(--accent); color: var(--text-main); }
 .tag.active { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 0 15px rgba(139, 92, 246, 0.4); }
 
-/* 🌟 اللمسة السحرية: توهج الزر */
+/* 🌟 توهج الزر */
 .cta-btn {
   width: 100%;
   background: var(--accent);
@@ -298,7 +301,7 @@ html[dir="rtl"] .char-counter { text-align: right; }
   margin-bottom: 30px;
 }
 
-/* 🌟 اللمسة السحرية: ظهور النتائج بشكل متتالي */
+/* 🌟 ظهور النتائج بشكل متتالي */
 .result-block {
   margin-bottom: 24px;
   opacity: 0;
@@ -386,14 +389,14 @@ html[dir="rtl"] .result-list li::before { left: auto; right: 12px; }
 }
 .share-btn:hover { background: #059669; box-shadow: 0 0 20px rgba(16, 185, 129, 0.4); }
 
-/* ================= الفوتر ================= */
+/* ================= الفوتر (التذييل) ================= */
 .site-footer { margin-top: auto; border-top: 1px solid var(--border); padding: 24px 0; background: rgba(30, 41, 59, 0.8); }
 .footer-inner { display: flex; flex-direction: column; align-items: center; gap: 12px; color: var(--text-muted); font-size: 0.9rem; }
 .footer-links { display: flex; gap: 16px; }
 .link-btn { background: transparent; border: none; color: var(--text-muted); cursor: pointer; text-decoration: underline; font-family: inherit; font-size: 0.9rem; transition: color 0.2s; }
 .link-btn:hover { color: var(--accent-light); }
 
-/* ================= النوافذ المنبثقة ================= */
+/* ================= النوافذ المنبثقة (Modals) ================= */
 .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 20px; animation: fadeIn 0.3s ease-out; }
 .modal[hidden] { display: none; }
 .modal-content { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 30px; max-width: 500px; width: 100%; max-height: 85vh; overflow-y: auto; position: relative; box-shadow: var(--shadow); transform: scale(0.95); animation: popIn 0.3s forwards; }
@@ -413,32 +416,9 @@ html[dir="rtl"] .modal-close { right: auto; left: 16px; }
   .result-header { flex-direction: column; align-items: flex-start; gap: 10px; }
 }
 
-/* 🌟 اللمسة السحرية: إشعارات (Toast) */
-.toast-container {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 1000;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.toast {
-  background: var(--bg-card);
-  color: var(--text-main);
-  border: 1px solid var(--accent);
-  padding: 12px 24px;
-  border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-  font-weight: 600;
-  animation: dropDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-}
-
+/* 🌟 الإشعارات (Toast) */
+.toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 1000; display: flex; flex-direction: column; gap: 10px; }
+.toast { background: var(--bg-card); color: var(--text-main); border: 1px solid var(--accent); padding: 12px 24px; border-radius: 8px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-weight: 600; animation: dropDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 .toast.error { border-color: var(--danger); }
-
-@keyframes dropDown {
-  from { opacity: 0; transform: translateY(-20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
+@keyframes dropDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fadeOut { to { opacity: 0; transform: translateY(-10px); } }
