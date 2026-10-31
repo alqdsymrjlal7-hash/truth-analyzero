@@ -100,44 +100,11 @@ const translations = {
   }
 };
 
+// اللغة الافتراضية في حال فشل كل شيء
 let currentLang = 'ar';
 
-// ================= 1. التبديل التلقائي بين الوضع النهاري والليلي =================
-function setThemeByTime() {
-  const hour = new Date().getHours();
-  const isDayTime = hour >= 6 && hour < 18;
-
-  if (isDayTime) {
-    document.body.classList.add('light-mode');
-  } else {
-    document.body.classList.remove('light-mode');
-  }
-}
-setThemeByTime();
-
-// ================= 2. دالة الإشعارات الأنيقة (Toast) =================
-function showToast(message, isError = false) {
-  let container = document.querySelector('.toast-container');
-  if (!container) {
-    container = document.createElement('div');
-    container.className = 'toast-container';
-    document.body.appendChild(container);
-  }
-
-  const toast = document.createElement('div');
-  toast.className = `toast ${isError ? 'error' : ''}`;
-  toast.textContent = message;
-  container.appendChild(toast);
-
-  setTimeout(() => {
-    toast.style.animation = 'fadeOut 0.3s forwards';
-    setTimeout(() => toast.remove(), 300);
-  }, 3500);
-}
-
-// ================= 3. دالة تغيير اللغة =================
-function toggleLanguage() {
-  currentLang = currentLang === 'ar' ? 'en' : 'ar';
+// ================= 1. دالة تطبيق اللغة على الصفحة =================
+function applyLanguage() {
   const htmlTag = document.documentElement;
   const langToggleBtn = document.getElementById('langCurrent');
   const langOtherBtn = document.querySelector('.lang-other');
@@ -154,6 +121,7 @@ function toggleLanguage() {
     langOtherBtn.textContent = 'EN';
   }
 
+  // تحديث النصوص
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
     if (translations[currentLang][key]) {
@@ -161,6 +129,7 @@ function toggleLanguage() {
     }
   });
 
+  // تحديث placeholders
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');
     if (translations[currentLang][key]) {
@@ -169,9 +138,81 @@ function toggleLanguage() {
   });
 }
 
+// ================= 2. التبديل اليدوي للغة =================
+function toggleLanguage() {
+  currentLang = currentLang === 'ar' ? 'en' : 'ar';
+  applyLanguage();
+}
 document.getElementById('langToggle').addEventListener('click', toggleLanguage);
 
-// ================= 4. عدّاد الأحرف وتكبير المربع تلقائياً =================
+// ================= 3. الكشف التلقائي عن لغة المستخدم 🌟 =================
+async function autoDetectLanguage() {
+  // الخطوة الأولى: فحص لغة جهاز المستخدم (Browser Language) - أسرع وأدق
+  const browserLang = navigator.language || navigator.userLanguage;
+  
+  if (browserLang.startsWith('ar')) {
+    currentLang = 'ar';
+    return applyLanguage();
+  } else if (browserLang.startsWith('en')) {
+    currentLang = 'en';
+    return applyLanguage();
+  }
+
+  // الخطوة الثانية: إذا كانت لغة المتصفح غير عربية أو إنجليزية (مثلاً فرنسي)، نفحص الـ IP
+  try {
+    const response = await fetch('https://ipapi.co/json/');
+    const data = await response.json();
+    
+    // قائمة رموز الدول العربية
+    const arabicCountries = ['SA', 'YE', 'EG', 'AE', 'QA', 'KW', 'BH', 'OM', 'JO', 'LB', 'SY', 'IQ', 'PS', 'SD', 'LY', 'TN', 'DZ', 'MA', 'MR', 'SO', 'DJ', 'KM'];
+    
+    if (arabicCountries.includes(data.country_code)) {
+      currentLang = 'ar';
+    } else {
+      currentLang = 'en'; // إذا كان من أي دولة أجنبية
+    }
+  } catch (error) {
+    console.error('IP detection failed:', error);
+    currentLang = 'en'; // لغة افتراضية في حال فشل الاتصال بمزود الـ IP
+  }
+  
+  applyLanguage();
+}
+
+// تشغيل الكشف التلقائي فور تحميل الصفحة
+autoDetectLanguage();
+
+// ================= 4. التبديل التلقائي بين الوضع النهاري والليلي =================
+function setThemeByTime() {
+  const hour = new Date().getHours();
+  const isDayTime = hour >= 6 && hour < 18;
+  if (isDayTime) {
+    document.body.classList.add('light-mode');
+  } else {
+    document.body.classList.remove('light-mode');
+  }
+}
+setThemeByTime();
+
+// ================= 5. دالة الإشعارات =================
+function showToast(message, isError = false) {
+  let container = document.querySelector('.toast-container');
+  if (!container) {
+    container = document.createElement('div');
+    container.className = 'toast-container';
+    document.body.appendChild(container);
+  }
+  const toast = document.createElement('div');
+  toast.className = `toast ${isError ? 'error' : ''}`;
+  toast.textContent = message;
+  container.appendChild(toast);
+  setTimeout(() => {
+    toast.style.animation = 'fadeOut 0.3s forwards';
+    setTimeout(() => toast.remove(), 300);
+  }, 3500);
+}
+
+// ================= 6. عدّاد الأحرف وتكبير المربع =================
 const messageInput = document.getElementById('messageInput');
 const questionInput = document.getElementById('questionInput');
 const charCount = document.getElementById('charCount');
@@ -181,15 +222,10 @@ messageInput.addEventListener('input', function() {
   this.style.height = '80px'; 
   const newHeight = Math.min(this.scrollHeight, 300);
   this.style.height = newHeight + 'px';
-  
-  if (this.scrollHeight > 300) {
-    this.style.overflowY = 'auto';
-  } else {
-    this.style.overflowY = 'hidden';
-  }
+  this.style.overflowY = this.scrollHeight > 300 ? 'auto' : 'hidden';
 });
 
-// ================= 5. تفعيل الأزرار (Tags) =================
+// ================= 7. تفعيل الأزرار (Tags) =================
 const tagButtons = document.querySelectorAll('.tag');
 tagButtons.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -198,14 +234,13 @@ tagButtons.forEach(btn => {
   });
 });
 
-// ================= 6. فتح وإغلاق النوافذ المنبثقة =================
+// ================= 8. النوافذ المنبثقة =================
 document.querySelectorAll('.link-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const modalId = btn.getAttribute('data-modal');
     document.getElementById(modalId).hidden = false;
   });
 });
-
 document.querySelectorAll('.modal-close').forEach(btn => {
   btn.addEventListener('click', () => {
     const modalId = btn.getAttribute('data-close');
@@ -213,25 +248,23 @@ document.querySelectorAll('.modal-close').forEach(btn => {
   });
 });
 
-// ================= 7. شاشة التحميل =================
+// ================= 9. شاشة التحميل =================
 let loadingInterval;
 const loadingTextElement = document.getElementById('loadingText');
 
 function startLoadingAnimation() {
   let step = 1;
   loadingTextElement.textContent = translations[currentLang].loading_1;
-  
   loadingInterval = setInterval(() => {
     step = step === 1 ? 2 : (step === 2 ? 3 : 1);
     loadingTextElement.textContent = translations[currentLang][`loading_${step}`];
   }, 1500);
 }
-
 function stopLoadingAnimation() {
   clearInterval(loadingInterval);
 }
 
-// ================= 8. عرض النتائج =================
+// ================= 10. عرض النتائج =================
 function displayResults(data) {
   document.getElementById('resultTone').textContent = data.tone || '-';
 
@@ -272,7 +305,6 @@ function displayResults(data) {
 
   document.getElementById('resultSummary').textContent = data.summary || '-';
 
-  // إظهار إجابة السؤال إذا وجدت
   if (data.answer && data.answer !== "null" && data.answer.trim() !== "") {
     document.getElementById('resultAnswer').textContent = data.answer;
     document.getElementById('resultAnswerBlock').hidden = false;
@@ -285,7 +317,7 @@ function displayResults(data) {
   document.getElementById('resultCard').hidden = false;
 }
 
-// ================= 9. زر التحليل الرئيسي =================
+// ================= 11. زر التحليل =================
 document.getElementById('analyzeBtn').addEventListener('click', async () => {
   const text = messageInput.value.trim();
   const question = questionInput.value.trim();
@@ -303,9 +335,7 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
   try {
     const response = await fetch('/api/analyze', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ text: text, question: question })
     });
 
@@ -315,7 +345,6 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     }
 
     const data = await response.json();
-    
     stopLoadingAnimation();
     displayResults(data);
 
@@ -324,25 +353,23 @@ document.getElementById('analyzeBtn').addEventListener('click', async () => {
     stopLoadingAnimation();
     document.getElementById('loadingBox').hidden = true;
     document.getElementById('analyzerCard').style.display = 'block';
-    
     showToast(error.message || translations[currentLang].error_api, true);
   }
 });
 
-// ================= 10. زر التحليل الجديد (إعادة تعيين) =================
+// ================= 12. زر التحليل الجديد =================
 document.getElementById('resetBtn').addEventListener('click', () => {
   messageInput.value = '';
-  questionInput.value = ''; // تفريغ حقل السؤال
+  questionInput.value = '';
   charCount.textContent = '0';
   messageInput.style.height = '80px';
   messageInput.style.overflowY = 'hidden';
   tagButtons.forEach(b => b.classList.remove('active'));
-  
   document.getElementById('resultCard').hidden = true;
   document.getElementById('analyzerCard').style.display = 'block';
 });
 
-// ================= 11. زر المشاركة =================
+// ================= 13. زر المشاركة =================
 document.getElementById('shareBtn').addEventListener('click', () => {
   navigator.clipboard.writeText(window.location.href).then(() => {
     showToast(currentLang === 'ar' ? 'تم نسخ رابط الموقع بنجاح! 🎉 شاركه مع أصدقائك.' : 'Link copied successfully! 🎉 Share it with your friends.');
