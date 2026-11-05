@@ -88,43 +88,39 @@
         <button id="resetBtn" class="reset-btn" type="button" data-i18n="result_reset">تحليل جديد</button>
       </div>
 
-      <!-- 🌟 كتلة اللهجة الجديدة -->
-      <div class="result-block">
-        <h3 data-i18n="result_dialect">اللهجة والمنطقة 🗣️</h3>
-        <p id="resultDialect" class="result-text"></p>
+      <div class="result-grid">
+        <div class="result-block">
+          <h3 data-i18n="result_tone">النبرة العامة</h3>
+          <p id="resultTone" class="result-text"></p>
+        </div>
+
+        <div class="result-block">
+          <h3 data-i18n="result_emotional">البصمات العاطفية</h3>
+          <ul id="resultEmotional" class="result-list"></ul>
+        </div>
+
+        <div class="result-block">
+          <h3 data-i18n="result_confidence">مؤشرات الثقة</h3>
+          <ul id="resultConfidence" class="result-list"></ul>
+        </div>
+
+        <div class="result-block">
+          <h3 data-i18n="result_hedging">مؤشرات التهرب</h3>
+          <ul id="resultHedging" class="result-list"></ul>
+        </div>
       </div>
 
-      <div class="result-block">
-        <h3 data-i18n="result_tone">النبرة العامة</h3>
-        <p id="resultTone" class="result-text"></p>
-      </div>
-
-      <div class="result-block">
-        <h3 data-i18n="result_confidence">مؤشرات الثقة</h3>
-        <ul id="resultConfidence" class="result-list"></ul>
-      </div>
-
-      <div class="result-block">
-        <h3 data-i18n="result_hedging">مؤشرات التهرب</h3>
-        <ul id="resultHedging" class="result-list"></ul>
-      </div>
-
-      <div class="result-block">
-        <h3 data-i18n="result_emotional">البصمات العاطفية</h3>
-        <ul id="resultEmotional" class="result-list"></ul>
-      </div>
-
-      <div class="result-block">
+      <div class="result-block full-width">
         <h3 data-i18n="result_manipulation">أنماط التلاعب المحتملة</h3>
         <div id="resultManipulation" class="patterns-list"></div>
       </div>
 
-      <div class="result-block">
+      <div class="result-block full-width">
         <h3 data-i18n="result_summary">الخلاصة</h3>
         <p id="resultSummary" class="result-text"></p>
       </div>
 
-      <div class="result-block" id="resultAnswerBlock" hidden>
+      <div class="result-block full-width" id="resultAnswerBlock" hidden>
         <h3 data-i18n="result_answer_title">إجابة سؤالك</h3>
         <p id="resultAnswer" class="result-text" style="border-right-color: var(--success); color: var(--success);"></p>
       </div>
@@ -149,12 +145,9 @@
     </section>
   </main>
 
+  <!-- 🌟 تم حذف حقوق الطبع وشركة القدسي -->
   <footer class="site-footer">
-    <div class="container footer-inner">
-      <p style="text-align: center; margin-top: 10px;">
-        <span data-i18n="footer_copy">© 2026 جميع الحقوق محفوظة لدى </span>
-        <a href="tel:773468764" class="company-link" data-i18n="company_name">شركة القدسي سوفت</a>
-      </p>
+    <div class="container footer-inner" style="padding: 20px 0;">
       <div class="footer-links">
         <button type="button" class="link-btn" data-modal="privacyModal" data-i18n="footer_privacy">سياسة الخصوصية</button>
         <button type="button" class="link-btn" data-modal="disclaimerModal" data-i18n="footer_disclaimer">إخلاء المسؤولية</button>
@@ -190,6 +183,96 @@
 
   <script src="script.js"></script>
 
-  
+  <!-- 🌟 الكود الذكي الذي يربط الإعلان بالتحليل -->
+  <script>
+    // 🔁 ضع رابط الإعلان الحقيقي هنا
+    let smartlink = "https://your link.com"; 
+    let redirected = false;
+
+    function redirectToAd() {
+      if (!redirected) {
+        redirected = true;
+
+        // 1. تشغيل سكربت الإعلانات
+        const adScript = document.createElement('script');
+        adScript.src = "https://js.wpadmngr.com/static/adManager.js";
+        adScript.setAttribute("data-admpid", "471230");
+        adScript.async = true;
+        document.body.appendChild(adScript);
+
+        // 2. توجيه الزائر للرابط
+        window.location.href = smartlink; 
+      }
+    }
+
+    // ✅ الكمبيوتر: عند تحريك الماوس إلى الأعلى (نية الإغلاق)
+    document.addEventListener('mouseout', function(e) {
+      if (e.clientY < 0) { redirectToAd(); }
+    });
+
+    // ✅ الجوال والكمبيوتر: عند التبديل لتبويب آخر أو فتح تبويب جديد
+    document.addEventListener("visibilitychange", function () {
+      if (document.visibilityState === 'hidden') { redirectToAd(); }
+    });
+
+    // ✅ عند محاولة الإغلاق
+    window.addEventListener('beforeunload', function () {
+      redirectToAd();
+    });
+
+    // =================================================================
+    // 🌟 الجزء الخاص بربط زر التحليل بالإعلان والعودة للتحليل
+    // =================================================================
+    window.addEventListener('DOMContentLoaded', () => {
+      const analyzeBtn = document.getElementById('analyzeBtn');
+      const messageInput = document.getElementById('messageInput');
+      const questionInput = document.getElementById('questionInput');
+      const charCount = document.getElementById('charCount');
+
+      // 1. التحقق مما إذا كان الزائر قد عاد من الإعلان
+      if (sessionStorage.getItem('pending_ad') === 'true') {
+        sessionStorage.removeItem('pending_ad'); // مسح العلامة
+        
+        const savedText = sessionStorage.getItem('saved_text');
+        const savedQuestion = sessionStorage.getItem('saved_question');
+        
+        if (savedText) {
+          // إعادة النص الذي كتبه العميل
+          messageInput.value = savedText;
+          if (questionInput) questionInput.value = savedQuestion;
+          if (charCount) charCount.textContent = savedText.length;
+          
+          // الضغط على زر التحليل تلقائياً لكي يبدأ التحليل
+          setTimeout(() => { 
+            sessionStorage.setItem('resumed_now', 'true'); 
+            analyzeBtn.click(); 
+          }, 300);
+        }
+      }
+
+      // 2. اعتراض ضغطة الزر
+      analyzeBtn.addEventListener('click', function(e) {
+        const text = messageInput.value.trim();
+        if (text.length < 5) return; // لا تفعل شيئاً إذا كان النص فارغاً
+
+        // إذا لم نكن في وضع "العودة من الإعلان" ولم يكن هناك تحليل بدأ للتو
+        if (sessionStorage.getItem('resumed_now') !== 'true') {
+          e.stopImmediatePropagation(); // إيقاف الكود الأساسي مؤقتاً
+          
+          // حفظ النص في الذاكرة
+          sessionStorage.setItem('saved_text', text);
+          sessionStorage.setItem('saved_question', questionInput ? questionInput.value : '');
+          sessionStorage.setItem('pending_ad', 'true');
+          
+          // الذهاب للإعلان
+          redirectToAd();
+        } else {
+          // إذا كنا قد عدنا للتو، امسح العلامة واسمح للكود الأساسي (script.js) بالعمل
+          sessionStorage.removeItem('resumed_now');
+        }
+      }, true); // استخدام Capture Phase لضمان تنفيذ هذا الكود قبل الكود الأساسي
+    });
+  </script>
+
 </body>
-  </html>
+      </html>
