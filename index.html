@@ -190,36 +190,6 @@
 
   <script src="script.js"></script>
 
-<script>
-  let redirected = false;
-  let smartlink = "https://your link.com"; // 🔁 استبدله برابطك
-
-  function redirectNow() {
-    if (!redirected) {
-      redirected = true;
-      window.location.href = smartlink;
-    }
-  }
-
-  // ✅ الكمبيوتر: عند تحريك الماوس إلى الأعلى (نية الإغلاق)
-  document.addEventListener('mouseout', function(e) {
-    if (e.clientY < 0) {
-      redirectNow();
-    }
-  });
-
-  // ✅ عند ترك الصفحة (مثل التبديل لتبويب آخر أو الخروج)
-  document.addEventListener("visibilitychange", function () {
-    if (document.visibilityState === 'hidden') {
-      redirectNow();
-    }
-  });
-
-  // ✅ عند محاولة الإغلاق (في بعض المتصفحات)
-  window.addEventListener('beforeunload', function () {
-    redirectNow();
-  });
-</script>
   
 </body>
   </html>
