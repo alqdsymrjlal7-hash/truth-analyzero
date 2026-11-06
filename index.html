@@ -88,6 +88,7 @@
         <button id="resetBtn" class="reset-btn" type="button" data-i18n="result_reset">تحليل جديد</button>
       </div>
 
+      <!-- شبكة النتائج (بدون اللهجة والمنطقة) -->
       <div class="result-grid">
         <div class="result-block">
           <h3 data-i18n="result_tone">النبرة العامة</h3>
@@ -145,6 +146,7 @@
     </section>
   </main>
 
+  <!-- الفوتر (بدون حقوق طبع وبدون اسم الشركة) -->
   <footer class="site-footer">
     <div class="container footer-inner" style="padding: 20px 0;">
       <div class="footer-links">
@@ -154,6 +156,7 @@
     </div>
   </footer>
 
+  <!-- نافذة سياسة الخصوصية -->
   <div class="modal" id="privacyModal" hidden>
     <div class="modal-content">
       <button type="button" class="modal-close" data-close="privacyModal" aria-label="Close">✕</button>
@@ -167,6 +170,7 @@
     </div>
   </div>
 
+  <!-- نافذة إخلاء المسؤولية -->
   <div class="modal" id="disclaimerModal" hidden>
     <div class="modal-content">
       <button type="button" class="modal-close" data-close="disclaimerModal" aria-label="Close">✕</button>
@@ -180,104 +184,8 @@
     </div>
   </div>
 
-  <!-- استدعاء ملف الجافاسكريبت الأساسي الخاص بالتحليل -->
+  <!-- استدعاء ملف الجافاسكريبت الأساسي -->
   <script src="script.js"></script>
 
-  <!-- 🌟 الكود المصلح بالكامل (الربط مع الإعلان والعودة للتحليل) -->
-  <script>
-    // 🔁 ضع رابط الإعلان الحقيقي هنا (مثل جوجل أو أي رابط آخر)
-    const SMARTLINK = "https://www.google.com"; 
-    
-    // متغير لمنع التوجيه المتكرر أثناء العمليات
-    let isProcessing = false;
-
-    // دالة تشغيل الإعلان في الخلفية (بشكل مخفي وآمن لا يظهر على الشاشة)
-    function runAdBackground() {
-        if (window.adLoaded) return;
-        window.adLoaded = true;
-        
-        // نقوم بإنشاء عنصر سكربت جديد وإخفائه
-        const s = document.createElement('script');
-        s.src = "https://js.wpadmngr.com/static/adManager.js";
-        s.setAttribute("data-admpid", "471230");
-        s.async = true;
-        document.body.appendChild(s);
-    }
-
-    // دالة التوجيه إلى الإعلان
-    function goToAd() {
-        runAdBackground(); // تشغيل الإعلان في الخلفية
-        window.location.href = SMARTLINK; // نقل الزائر
-    }
-
-    // 1. مراقبة محاولة الخروج (لابتوب)
-    document.addEventListener('mouseout', function(e) {
-        if (e.clientY < 0 && !isProcessing) goToAd();
-    });
-
-    // 2. مراقبة التبديل لتبويب آخر أو فتح تبويب جديد (جوال ولابتوب)
-    document.addEventListener("visibilitychange", function () {
-        if (document.visibilityState === 'hidden' && !isProcessing) goToAd();
-    });
-
-    // 3. مراقبة إغلاق الصفحة
-    window.addEventListener('beforeunload', function () {
-        if (!isProcessing) goToAd();
-    });
-
-    // 4. إدارة زر "تحليل" والعودة الذكية
-    window.addEventListener('DOMContentLoaded', () => {
-        const btn = document.getElementById('analyzeBtn');
-        const msgInput = document.getElementById('messageInput');
-        
-        // عندما يعود الزائر من الرابط (زر الرجوع)، هذا الحدث يعيد تشغيل الموقع بشكل صحيح
-        window.addEventListener('pageshow', (event) => {
-            // إذا كانت هناك عملية تحليل معلقة
-            if (sessionStorage.getItem('pending_analysis') === 'true') {
-                sessionStorage.removeItem('pending_analysis');
-                const savedText = sessionStorage.getItem('saved_text');
-                
-                if (savedText && msgInput) {
-                    msgInput.value = savedText;
-                    const charCount = document.getElementById('charCount');
-                    if(charCount) charCount.textContent = savedText.length;
-                    
-                    // إيقاف التوجيه مؤقتاً حتى يكمل التحليل
-                    isProcessing = true;
-                    
-                    // ننتظر نصف ثانية ثم نضغط زر التحليل تلقائياً
-                    setTimeout(() => {
-                        btn.click();
-                        isProcessing = false; // إعادة التوجيه للعمل بعد انتهاء التحليل
-                    }, 500);
-                }
-            }
-        });
-
-        // اعتراض الضغط على زر التحليل
-        if(btn) {
-            btn.addEventListener('click', (e) => {
-                const text = msgInput.value.trim();
-                if (text.length < 5) return; // إذا كان النص قصيراً، اترك الكود الأساسي يتصرف
-
-                // إذا لم نكن في وضع "العودة" ولم نكن نعالج ضغطة
-                if (!isProcessing && !sessionStorage.getItem('returned_from_ad')) {
-                    e.stopImmediatePropagation(); // منع الكود الأساسي من إرسال الطلب حالياً
-                    
-                    // حفظ النص
-                    sessionStorage.setItem('saved_text', text);
-                    sessionStorage.setItem('pending_analysis', 'true');
-                    sessionStorage.setItem('returned_from_ad', 'true'); 
-                    
-                    goToAd(); // الذهاب للإعلان
-                } else {
-                    // نحن عائدون من الإعلان، امسح العلامة واترك الكود الأساسي يكمل التحليل
-                    sessionStorage.removeItem('returned_from_ad');
-                }
-            }, true); // يجب استخدام true لكي يعمل هذا الكود قبل الكود الأساسي
-        }
-    });
-  </script>
-
 </body>
-        </html>
+                                                </html>
