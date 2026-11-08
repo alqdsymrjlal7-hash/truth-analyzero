@@ -9,7 +9,7 @@
   <meta name="color-scheme" content="light dark" />
   <meta name="format-detection" content="telephone=no" />
 
-  <!-- CSP متسامحة لدعم النطاقات الديناميكية لشبكة الإعلانات -->
+  <!-- CSP متسامحة لدعم نطاقات شبكة الإعلانات الديناميكية -->
   <meta http-equiv="Content-Security-Policy"
         content="default-src 'self';
                  script-src 'self' 'unsafe-inline' https:;
@@ -78,7 +78,7 @@
 
   <noscript>
     <div style="padding: 16px; text-align: center; background: #fef2f2; color: #991b1b; border-bottom: 1px solid #fca5a5;">
-      ⚠️ هذه الأداة تحتاج إلى تفعيل JavaScript للعمل. يرجى تفعيله في متصفحك ثم إعادة تحميل الصفحة.
+      ⚠️ هذه الأداة تحتاج إلى تفعيل JavaScript للعمل.
     </div>
   </noscript>
 
@@ -107,12 +107,8 @@
 
     <section class="analyzer-card" id="analyzerCard" aria-labelledby="inputLabel">
       <label for="messageInput" id="inputLabel" class="field-label" data-i18n="input_label">النص المراد تحليله</label>
-      <textarea id="messageInput"
-                class="message-input"
-                data-i18n-placeholder="input_placeholder"
-                placeholder="ألصق الرسالة أو المحادثة هنا لفحصها..."
-                maxlength="2000"
-                rows="1"></textarea>
+      <textarea id="messageInput" class="message-input" data-i18n-placeholder="input_placeholder"
+                placeholder="ألصق الرسالة أو المحادثة هنا لفحصها..." maxlength="2000" rows="1"></textarea>
       <div class="char-counter" aria-live="polite" aria-atomic="true">
         <span id="charCount">0</span> / 2000
       </div>
@@ -137,9 +133,7 @@
 
       <div class="question-section">
         <label for="questionInput" class="field-label" data-i18n="question_label">هل لديك سؤال حول النص؟ (اختياري)</label>
-        <input type="text"
-               id="questionInput"
-               class="question-input"
+        <input type="text" id="questionInput" class="question-input"
                placeholder="مثال: هل هذا الشخص يهددني؟ أو كيف أرد عليه؟"
                data-i18n-placeholder="question_placeholder" />
       </div>
@@ -164,17 +158,14 @@
           <h3 data-i18n="result_tone">النبرة العامة</h3>
           <p id="resultTone" class="result-text"></p>
         </div>
-
         <div class="result-block">
           <h3 data-i18n="result_emotional">البصمات العاطفية</h3>
           <ul id="resultEmotional" class="result-list"></ul>
         </div>
-
         <div class="result-block">
           <h3 data-i18n="result_confidence">مؤشرات الثقة</h3>
           <ul id="resultConfidence" class="result-list"></ul>
         </div>
-
         <div class="result-block">
           <h3 data-i18n="result_hedging">مؤشرات التهرب</h3>
           <ul id="resultHedging" class="result-list"></ul>
@@ -235,9 +226,9 @@
       <h2 id="privacyTitle" data-i18n="privacy_title">سياسة الخصوصية</h2>
       <div class="modal-body">
         <p data-i18n="privacy_body_1">نحن لا نخزّن النصوص التي تلصقها في الموقع.</p>
-        <p data-i18n="privacy_body_2">عند ضغطك على زر التحليل، يُرسَل النص إلى خدمة تحليل لغوي خارجية (Groq) لمعالجته وإعادته إليك.</p>
-        <p data-i18n="privacy_body_3">لا تُشارَك بياناتك مع أي طرف آخر، ولا تُستخدم لأي غرض غير التحليل الفوري.</p>
-        <p data-i18n="privacy_body_4">يُرجى عدم لصق معلومات شخصية حساسة (أرقام هوية، كلمات مرور، بيانات بنكية).</p>
+        <p data-i18n="privacy_body_2">عند ضغطك على زر التحليل، يُرسَل النص إلى خدمة تحليل لغوي خارجية (Groq).</p>
+        <p data-i18n="privacy_body_3">لا تُشارَك بياناتك مع أي طرف آخر.</p>
+        <p data-i18n="privacy_body_4">يُرجى عدم لصق معلومات شخصية حساسة.</p>
       </div>
     </div>
   </div>
@@ -247,9 +238,9 @@
       <button type="button" class="modal-close" data-close="disclaimerModal" aria-label="إغلاق النافذة">✕</button>
       <h2 id="disclaimerTitle" data-i18n="disclaimer_title">إخلاء المسؤولية</h2>
       <div class="modal-body">
-        <p data-i18n="disclaimer_body_1">هذه الأداة تُقدّم تحليلًا لغويًا تعليميًا للنصوص، وليست أداة لكشف الكذب.</p>
-        <p data-i18n="disclaimer_body_2">لا تعتمد على نتائجها لاتخاذ قرارات شخصية أو قانونية أو مالية.</p>
-        <p data-i18n="disclaimer_body_3">لا يوجد أي أساس علمي لتحويل نبرة النص إلى نسبة صدق مئوية.</p>
+        <p data-i18n="disclaimer_body_1">هذه الأداة تُقدّم تحليلًا لغويًا تعليميًا، وليست أداة كشف كذب.</p>
+        <p data-i18n="disclaimer_body_2">لا تعتمد على نتائجها لاتخاذ قرارات مصيرية.</p>
+        <p data-i18n="disclaimer_body_3">لا يوجد أساس علمي لتحويل نبرة النص إلى نسبة صدق.</p>
         <p data-i18n="disclaimer_body_4">استخدامك للأداة على مسؤوليتك الشخصية.</p>
       </div>
     </div>
@@ -263,7 +254,7 @@
   </script>
 
   <!-- ============================================================
-       طبقة التفعيل: زر التحليل + Exit-Intent
+       طبقة التفعيل: يُطلق الإعلان عند الضغط على زر "تحليل"
        ============================================================ -->
   <script>
     (function () {
@@ -272,86 +263,53 @@
       var ADMPID = 471230;
       var fired  = false;
 
+      // ابحث عن API الشبكة تحت أي اسم معروف
       function findApi() {
         return window.a3klsam || window.adManager || window.admp || null;
       }
 
-      // إطلاق الإعلان عبر أي طريقة متاحة في الشبكة
+      // حاول إطلاق الإعلان عبر أي دالة متاحة
       function triggerAd() {
-        if (fired) return false;
+        if (fired) return;
 
         var api = findApi();
-        if (!api) return false;
+        if (!api) return;
 
         var methods = ['click','pop','show','run','trigger','open','popunder','fire','launch'];
         for (var i = 0; i < methods.length; i++) {
           if (typeof api[methods[i]] === 'function') {
-            try {
-              api[methods[i]]();
-              fired = true;
-              return true;
-            } catch (e) { /* try next */ }
+            try { api[methods[i]](); fired = true; return; } catch (e) {}
           }
         }
-
-        // محاولة إعادة init (بعض الشبكات تُطلق popunder عند init)
         if (typeof api.init === 'function') {
-          try {
-            api.init(ADMPID);
-            fired = true;
-            return true;
-          } catch (e) {}
+          try { api.init(ADMPID); fired = true; return; } catch (e) {}
         }
-
-        return false;
       }
 
-      // 1) زر التحليل: يفتح إعلان + يعمل التحليل معًا
-      //    (النقرة الطبيعية كافية لتفعيل PopUnder في الشبكة)
+      // عند تحميل الصفحة: اربط زر التحليل بإطلاق الإعلان
       document.addEventListener('DOMContentLoaded', function () {
         var analyzeBtn = document.getElementById('analyzeBtn');
-        if (analyzeBtn) {
-          analyzeBtn.addEventListener('click', function () {
-            // النقرة على هذا الزر ستُفعّل PopUnder تلقائيًا عبر مستمع الشبكة
-            // ونحاول هنا أيضًا يدويًا كاحتياط
-            triggerAd();
-          }, { passive: true });
-        }
+        if (!analyzeBtn) return;
+
+        analyzeBtn.addEventListener('click', function () {
+          // 1) أطلق الإعلان (PopUnder = يفتح تبويب خلفي)
+          //    النقرة الطبيعية على الزر كافية لتفعيله في الشبكة
+          triggerAd();
+
+          // 2) لا نمنع التحليل من العمل — سيستمر في تنفيذ script.js بشكل طبيعي
+        }, { passive: true });
       });
 
-      // 2) Exit-Intent: تحريك الماوس نحو أعلى النافذة (بقصد الإغلاق)
-      document.addEventListener('mouseout', function (e) {
-        if (!e.relatedTarget && !e.toElement && e.clientY <= 5) {
-          triggerAd();
-        }
-      }, true);
-
-      // 3) Exit-Intent بديل: إخفاء التبويب / تبديل النافذة
+      // محاولة إضافية عند تبديل التبويب (اختياري — قد لا يعمل)
       document.addEventListener('visibilitychange', function () {
-        if (document.visibilityState === 'hidden') {
-          triggerAd();
-        }
-      });
-
-      // 4) Exit-Intent بديل أخير: مغادرة الصفحة
-      window.addEventListener('beforeunload', function () {
-        triggerAd();
-      }, { capture: true });
-
-      // إعادة تعيين الحالة إذا عاد المستخدم للصفحة (حتى يعمل الإعلان مرة أخرى)
-      document.addEventListener('visibilitychange', function () {
-        if (document.visibilityState === 'visible') {
-          // لا نُعيد تعيين fired مباشرة (لتجنّب إطلاق متكرر مزعج)
-          // يمكنك تفعيل السطر التالي إذا أردت السماح بإعلان جديد لكل عودة:
-          // fired = false;
-        }
+        if (document.visibilityState === 'hidden') triggerAd();
       });
 
     })();
   </script>
 
-  <!-- سكربت الموقع الأساسي (لا يحتاج تعديل) -->
+  <!-- سكربت الموقع الأساسي -->
   <script src="script.js" defer></script>
 
 </body>
-    </html>
+</html>
