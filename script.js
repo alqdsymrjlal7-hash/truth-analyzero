@@ -97,70 +97,181 @@ const translations = {
   }
 };
 
-let currentLang = 'ar';
-let currentAnalysisData = null; 
+// ==========================================
+// المتغيرات الأساسية
+// ==========================================
+let currentLang = 'en';
+let browserTargetLanguage = 'en';
+let currentAnalysisData = null;
+let loadingInterval = null;
+let googleTranslatorReady = false;
+let manualLanguageSelection = false;
 
+const messageInput = document.getElementById('messageInput');
+const questionInput = document.getElementById('questionInput');
+const charCount = document.getElementById('charCount');
+const loadingTextElement = document.getElementById('loadingText');
+
+// ==========================================
+// تحديد لغة المتصفح
+// ==========================================
+function getBrowserLanguage() {
+  const languages = navigator.languages?.length ? navigator.languages : [navigator.language || 'en'];
+  for (const language of languages) {
+    const code = language.toLowerCase().split('-')[0];
+    if (code && code !== 'und') return code;
+  }
+  return 'en';
+}
+
+// ==========================================
+// اتجاه الصفحة
+// ==========================================
+function setPageDirection(language) {
+  const rtlLanguages = ['ar', 'he', 'fa', 'ur', 'ps', 'sd', 'ug', 'yi', 'ku', 'dv'];
+  const html = document.documentElement;
+  html.setAttribute('lang', language);
+  html.setAttribute('dir', rtlLanguages.includes(language) ? 'rtl' : 'ltr');
+}
+
+// ==========================================
+// تطبيق اللغة الأساسية
+// ==========================================
 function applyLanguage() {
   const htmlTag = document.documentElement;
   const langToggleBtn = document.getElementById('langCurrent');
   const langOtherBtn = document.querySelector('.lang-other');
+  const dictionary = translations[currentLang] || translations.en;
 
-  if (currentLang === 'en') {
-    htmlTag.setAttribute('lang', 'en');
-    htmlTag.setAttribute('dir', 'ltr');
-    if(langToggleBtn) langToggleBtn.textContent = 'EN';
-    if(langOtherBtn) langOtherBtn.textContent = 'AR';
-  } else {
-    htmlTag.setAttribute('lang', 'ar');
-    htmlTag.setAttribute('dir', 'rtl');
-    if(langToggleBtn) langToggleBtn.textContent = 'AR';
-    if(langOtherBtn) langOtherBtn.textContent = 'EN';
-  }
+  htmlTag.setAttribute('lang', currentLang);
+  htmlTag.setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+
+  if (langToggleBtn) langToggleBtn.textContent = currentLang.toUpperCase();
+  if (langOtherBtn) langOtherBtn.textContent = currentLang === 'ar' ? 'EN' : 'AR';
 
   document.querySelectorAll('[data-i18n]').forEach(el => {
     const key = el.getAttribute('data-i18n');
-    if (translations[currentLang][key]) {
-      el.textContent = translations[currentLang][key];
+    if (Object.prototype.hasOwnProperty.call(dictionary, key)) {
+      el.textContent = dictionary[key];
     }
   });
 
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     const key = el.getAttribute('data-i18n-placeholder');
-    if (translations[currentLang][key]) {
-      el.setAttribute('placeholder', translations[currentLang][key]);
+    if (Object.prototype.hasOwnProperty.call(dictionary, key)) {
+      el.setAttribute('placeholder', dictionary[key]);
     }
   });
-  renderHistory(); 
+
+  const pageTitle = document.querySelector('[data-i18n="page_title"]');
+  if (pageTitle) document.title = dictionary.page_title;
+
+  renderHistory();
 }
 
+// ==========================================
+// التبديل اليدوي بين العربية والإنجليزية
+// ==========================================
 function toggleLanguage() {
+  manualLanguageSelection = true;
   currentLang = currentLang === 'ar' ? 'en' : 'ar';
   applyLanguage();
+  setPageDirection(currentLang);
+  if (currentLang === 'ar' || currentLang === 'en') {
+    changeGoogleLanguage(currentLang);
+  }
 }
 const langBtn = document.getElementById('langToggle');
-if(langBtn) langBtn.addEventListener('click', toggleLanguage);
+if (langBtn) langBtn.addEventListener('click', toggleLanguage);
 
-async function autoDetectLanguage() {
-  const browserLang = navigator.language || navigator.userLanguage;
-  if (browserLang.startsWith('ar')) {
-    currentLang = 'ar';
-    return applyLanguage();
-  } else if (browserLang.startsWith('en')) {
-    currentLang = 'en';
-    return applyLanguage();
-  }
-  try {
-    const response = await fetch('https://ipapi.co/json/');
-    const data = await response.json();
-    const arabicCountries = ['SA', 'YE', 'EG', 'AE', 'QA', 'KW', 'BH', 'OM', 'JO', 'LB', 'SY', 'IQ', 'PS', 'SD', 'LY', 'TN', 'DZ', 'MA', 'MR', 'SO', 'DJ', 'KM'];
-    currentLang = arabicCountries.includes(data.country_code) ? 'ar' : 'en';
-  } catch (error) {
-    currentLang = 'en';
-  }
-  applyLanguage();
+// ==========================================
+// خدمة الترجمة التلقائية
+// ==========================================
+function changeGoogleLanguage(language) {
+  if (!googleTranslatorReady) return;
+  const combo = document.querySelector('.goog-te-combo');
+  if (!combo) return;
+  const supported = Array.from(combo.options).some(option => option.value === language);
+  if (!supported) return;
+  combo.value = language;
+  combo.dispatchEvent(new Event('change', { bubbles: true }));
+  setPageDirection(language);
 }
-autoDetectLanguage();
 
+function initGoogleTranslate() {
+  if (browserTargetLanguage === 'en') return;
+  if (!document.getElementById('google_translate_element')) {
+    const element = document.createElement('div');
+    element.id = 'google_translate_element';
+    element.style.display = 'none';
+    document.body.appendChild(element);
+  }
+
+  if (!document.getElementById('translationStyles')) {
+    const style = document.createElement('style');
+    style.id = 'translationStyles';
+    style.textContent = `
+      .goog-te-banner-frame, .goog-te-balloon-frame, #goog-gt-tt, .goog-te-gadget, .skiptranslate { display: none !important; }
+      body { top: 0 !important; }
+      html { margin-top: 0 !important; }
+    `;
+    document.head.appendChild(style);
+  }
+
+  if (document.getElementById('googleTranslateScript')) return;
+
+  window.googleTranslateElementInit = function () {
+    new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'google_translate_element');
+    googleTranslatorReady = true;
+    setTimeout(() => { changeGoogleLanguage(browserTargetLanguage); }, 800);
+  };
+
+  const script = document.createElement('script');
+  script.id = 'googleTranslateScript';
+  script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+  script.onerror = () => { console.error('Google Translate could not be loaded.'); };
+  document.head.appendChild(script);
+}
+
+// ==========================================
+// اكتشاف اللغة عند فتح الموقع
+// ==========================================
+async function autoDetectLanguage() {
+  browserTargetLanguage = getBrowserLanguage();
+  if (browserTargetLanguage === 'ar') {
+    currentLang = 'ar';
+    applyLanguage();
+    setPageDirection('ar');
+    return;
+  }
+  currentLang = 'en';
+  applyLanguage();
+  setPageDirection(browserTargetLanguage);
+  if (browserTargetLanguage !== 'en') {
+    initGoogleTranslate();
+  }
+}
+
+// ==========================================
+// مراقبة العناصر التي تظهر ديناميكياً
+// ==========================================
+function observeDynamicContent() {
+  if (!window.MutationObserver) return;
+  const observer = new MutationObserver(() => {
+    if (!googleTranslatorReady) return;
+    const combo = document.querySelector('.goog-te-combo');
+    if (combo && combo.value !== browserTargetLanguage && !manualLanguageSelection) {
+      changeGoogleLanguage(browserTargetLanguage);
+    }
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
+}
+
+autoDetectLanguage().then(() => { observeDynamicContent(); });
+
+// ==========================================
+// الوضع الليلي والنهاري
+// ==========================================
 function setThemeByTime() {
   const hour = new Date().getHours();
   if (hour >= 6 && hour < 18) {
@@ -171,6 +282,9 @@ function setThemeByTime() {
 }
 setThemeByTime();
 
+// ==========================================
+// الإشعارات
+// ==========================================
 function showToast(message, isError = false) {
   let container = document.querySelector('.toast-container');
   if (!container) {
@@ -188,46 +302,51 @@ function showToast(message, isError = false) {
   }, 3500);
 }
 
-const messageInput = document.getElementById('messageInput');
-const questionInput = document.getElementById('questionInput');
-const charCount = document.getElementById('charCount');
-
-if(messageInput) {
-  messageInput.addEventListener('input', function() {
-    if(charCount) charCount.textContent = this.value.length;
-    this.style.height = 'auto'; 
+// ==========================================
+// عداد الأحرف وتنسيق حقل النص
+// ==========================================
+if (messageInput) {
+  messageInput.addEventListener('input', function () {
+    if (charCount) charCount.textContent = this.value.length;
+    this.style.height = 'auto';
     const newHeight = Math.min(this.scrollHeight, 300);
     this.style.height = newHeight + 'px';
     this.style.overflowY = this.scrollHeight > 300 ? 'auto' : 'hidden';
   });
 }
 
+// ==========================================
+// أزرار نوع العلاقة
+// ==========================================
 const tagButtons = document.querySelectorAll('.tag');
 tagButtons.forEach(btn => {
   btn.addEventListener('click', () => {
-    tagButtons.forEach(b => b.classList.remove('active'));
+    tagButtons.forEach(button => { button.classList.remove('active'); });
     btn.classList.add('active');
   });
 });
 
+// ==========================================
+// النوافذ المنبثقة
+// ==========================================
 document.querySelectorAll('.link-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const modalId = btn.getAttribute('data-modal');
     const modal = document.getElementById(modalId);
-    if(modal) modal.hidden = false;
+    if (modal) modal.hidden = false;
   });
 });
 document.querySelectorAll('.modal-close').forEach(btn => {
   btn.addEventListener('click', () => {
     const modalId = btn.getAttribute('data-close');
     const modal = document.getElementById(modalId);
-    if(modal) modal.hidden = true;
+    if (modal) modal.hidden = true;
   });
 });
 
-let loadingInterval;
-const loadingTextElement = document.getElementById('loadingText');
-
+// ==========================================
+// حركة التحميل
+// ==========================================
 function startLoadingAnimation(customText = null) {
   let step = 1;
   if (!loadingTextElement) return;
@@ -236,25 +355,32 @@ function startLoadingAnimation(customText = null) {
   } else {
     loadingTextElement.textContent = translations[currentLang].loading_1;
     loadingInterval = setInterval(() => {
-      step = step === 1 ? 2 : (step === 2 ? 3 : 1);
+      step = step === 1 ? 2 : step === 2 ? 3 : 1;
       loadingTextElement.textContent = translations[currentLang][`loading_${step}`];
     }, 1500);
   }
 }
-function stopLoadingAnimation() { clearInterval(loadingInterval); }
+function stopLoadingAnimation() {
+  clearInterval(loadingInterval);
+}
 
+// ==========================================
+// عرض النتائج (بدون لهجة)
+// ==========================================
 function displayResults(data) {
-  currentAnalysisData = data; 
-  
+  currentAnalysisData = data;
+
   const toneEl = document.getElementById('resultTone');
-  if(toneEl) toneEl.textContent = data.tone || '-';
+  if (toneEl) toneEl.textContent = data.tone || '-';
 
   const fillList = (elementId, items, emptyText) => {
     const ul = document.getElementById(elementId);
-    if(!ul) return;
+    if (!ul) return;
     ul.innerHTML = '';
     if (!items || items.length === 0) {
-      ul.innerHTML = `<li>${emptyText}</li>`;
+      const li = document.createElement('li');
+      li.textContent = emptyText;
+      ul.appendChild(li);
       return;
     }
     items.forEach(item => {
@@ -269,61 +395,88 @@ function displayResults(data) {
   fillList('resultEmotional', data.emotional_markers, translations[currentLang].no_signals);
 
   const manipulationContainer = document.getElementById('resultManipulation');
-  if(manipulationContainer) {
+  if (manipulationContainer) {
     manipulationContainer.innerHTML = '';
     if (!data.manipulation_patterns || data.manipulation_patterns.length === 0) {
-      manipulationContainer.innerHTML = `<p class="result-text">${translations[currentLang].no_patterns}</p>`;
+      const p = document.createElement('p');
+      p.className = 'result-text';
+      p.textContent = translations[currentLang].no_patterns;
+      manipulationContainer.appendChild(p);
     } else {
       data.manipulation_patterns.forEach(pattern => {
         const div = document.createElement('div');
         div.className = 'pattern-item';
-        div.innerHTML = `<div class="pattern-phrase">"${pattern.phrase}"</div><span class="pattern-type">${pattern.pattern}</span><div class="pattern-why">${pattern.why}</div>`;
+        const phrase = document.createElement('div');
+        phrase.className = 'pattern-phrase';
+        phrase.textContent = `"${pattern.phrase}"`;
+        const type = document.createElement('span');
+        type.className = 'pattern-type';
+        type.textContent = pattern.pattern;
+        const why = document.createElement('div');
+        why.className = 'pattern-why';
+        why.textContent = pattern.why;
+        div.append(phrase, type, why);
         manipulationContainer.appendChild(div);
       });
     }
   }
 
   const summaryEl = document.getElementById('resultSummary');
-  if(summaryEl) summaryEl.textContent = data.summary || '-';
+  if (summaryEl) summaryEl.textContent = data.summary || '-';
 
-  if (data.answer && data.answer !== "null" && data.answer.trim() !== "") {
+  if (data.answer && data.answer !== 'null' && data.answer.trim() !== '') {
     const ansEl = document.getElementById('resultAnswer');
-    if(ansEl) ansEl.textContent = data.answer;
+    if (ansEl) ansEl.textContent = data.answer;
     const ansBlock = document.getElementById('resultAnswerBlock');
-    if(ansBlock) ansBlock.hidden = false;
+    if (ansBlock) ansBlock.hidden = false;
   } else {
     const ansBlock = document.getElementById('resultAnswerBlock');
-    if(ansBlock) ansBlock.hidden = true;
+    if (ansBlock) ansBlock.hidden = true;
   }
 
-  document.getElementById('analyzerCard').style.display = 'none';
-  document.getElementById('loadingBox').hidden = true;
-  document.getElementById('resultCard').hidden = false;
+  const analyzerCard = document.getElementById('analyzerCard');
+  const loadingBox = document.getElementById('loadingBox');
+  const resultCard = document.getElementById('resultCard');
+
+  if (analyzerCard) analyzerCard.style.display = 'none';
+  if (loadingBox) loadingBox.hidden = true;
+  if (resultCard) resultCard.hidden = false;
 }
 
+// ==========================================
+// تحليل النص (يرسل responseLanguage للخادم)
+// ==========================================
 const analyzeBtn = document.getElementById('analyzeBtn');
-if(analyzeBtn) {
+if (analyzeBtn) {
   analyzeBtn.addEventListener('click', async () => {
-    const text = messageInput.value.trim();
+    const text = messageInput ? messageInput.value.trim() : '';
     const question = questionInput ? questionInput.value.trim() : '';
-    
-    if (text.length < 5) { showToast(translations[currentLang].error_empty, true); return; }
+
+    if (text.length < 5) {
+      showToast(translations[currentLang].error_empty, true);
+      return;
+    }
 
     document.getElementById('analyzerCard').style.display = 'none';
     document.getElementById('resultCard').hidden = true;
     document.getElementById('loadingBox').hidden = false;
+
     startLoadingAnimation();
 
     try {
-      const response = await fetch('/api/analyze', { // Vercel API endpoint
+      const response = await fetch('/api/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: text, question: question })
+        body: JSON.stringify({
+          text: text,
+          question: question,
+          responseLanguage: "same_as_input" // مهم جداً للخادم الجديد
+        })
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error || 'API Error');
+        throw new Error(errorData.error || translations[currentLang].error_api);
       }
 
       const data = await response.json();
@@ -341,33 +494,50 @@ if(analyzeBtn) {
   });
 }
 
+// ==========================================
+// إعادة التحليل
+// ==========================================
 const resetBtn = document.getElementById('resetBtn');
-if(resetBtn) {
+if (resetBtn) {
   resetBtn.addEventListener('click', () => {
-    messageInput.value = '';
-    if(questionInput) questionInput.value = '';
-    if(charCount) charCount.textContent = '0';
-    messageInput.style.height = '130px'; 
-    messageInput.style.overflowY = 'hidden';
-    tagButtons.forEach(b => b.classList.remove('active'));
+    if (messageInput) messageInput.value = '';
+    if (questionInput) questionInput.value = '';
+    if (charCount) charCount.textContent = '0';
+    if (messageInput) {
+      messageInput.style.height = '130px';
+      messageInput.style.overflowY = 'hidden';
+    }
+    tagButtons.forEach(btn => { btn.classList.remove('active'); });
     document.getElementById('resultCard').hidden = true;
     document.getElementById('analyzerCard').style.display = 'block';
     currentAnalysisData = null;
   });
 }
 
+// ==========================================
+// نسخ النتيجة
+// ==========================================
 const copyBtn = document.getElementById('copyBtn');
-if(copyBtn) {
+if (copyBtn) {
   copyBtn.addEventListener('click', () => {
     if (!currentAnalysisData) return showToast(translations[currentLang].toast_no_result, true);
     const d = currentAnalysisData;
-    const textToCopy = `${translations[currentLang].result_title}:\n${translations[currentLang].result_tone}: ${d.tone}\n${translations[currentLang].result_summary}: ${d.summary}\n${d.answer ? translations[currentLang].result_answer_title + ': ' + d.answer : ''}`.trim();
-    navigator.clipboard.writeText(textToCopy).then(() => showToast(translations[currentLang].toast_copied)).catch(() => showToast('Error', true));
+    const textToCopy = `${translations[currentLang].result_title}:\n` +
+      `${translations[currentLang].result_tone}: ${d.tone}\n` +
+      `${translations[currentLang].result_summary}: ${d.summary}\n` +
+      (d.answer ? translations[currentLang].result_answer_title + ': ' + d.answer : '');
+
+    navigator.clipboard.writeText(textToCopy.trim())
+      .then(() => { showToast(translations[currentLang].toast_copied); })
+      .catch(() => { showToast('Error', true); });
   });
 }
 
+// ==========================================
+// مشاركة واتساب
+// ==========================================
 const whatsappBtn = document.getElementById('whatsappBtn');
-if(whatsappBtn) {
+if (whatsappBtn) {
   whatsappBtn.addEventListener('click', () => {
     if (!currentAnalysisData) return;
     const summary = currentAnalysisData.summary || '';
@@ -377,15 +547,23 @@ if(whatsappBtn) {
   });
 }
 
+// ==========================================
+// نسخ رابط الموقع
+// ==========================================
 const shareBtn = document.getElementById('shareBtn');
-if(shareBtn) {
+if (shareBtn) {
   shareBtn.addEventListener('click', () => {
-    navigator.clipboard.writeText(window.location.href).then(() => showToast(translations[currentLang].toast_share_success)).catch(() => showToast(translations[currentLang].toast_share_fail, true));
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => { showToast(translations[currentLang].toast_share_success); })
+      .catch(() => { showToast(translations[currentLang].toast_share_fail, true); });
   });
 }
 
+// ==========================================
+// تحميل النتيجة كصورة
+// ==========================================
 const downloadBtn = document.getElementById('downloadBtn');
-if(downloadBtn) {
+if (downloadBtn) {
   downloadBtn.addEventListener('click', () => {
     const resultCard = document.getElementById('resultCard');
     const originalText = downloadBtn.textContent;
@@ -393,39 +571,49 @@ if(downloadBtn) {
     downloadBtn.disabled = true;
 
     const actionsDiv = document.querySelector('.result-actions');
-    const originalActionsDisplay = actionsDiv.style.display;
-    actionsDiv.style.display = 'none';
+    const originalActionsDisplay = actionsDiv ? actionsDiv.style.display : '';
+    if (actionsDiv) actionsDiv.style.display = 'none';
     const rBtn = document.getElementById('resetBtn');
-    if(rBtn) rBtn.style.display = 'none';
+    if (rBtn) rBtn.style.display = 'none';
 
     resultCard.classList.add('capturing');
 
-    html2canvas(resultCard, { scale: 2, useCORS: true, backgroundColor: '#080d18' }).then(canvas => {
-      resultCard.classList.remove('capturing');
-      actionsDiv.style.display = originalActionsDisplay;
-      if(rBtn) rBtn.style.display = '';
-      downloadBtn.textContent = originalText;
-      downloadBtn.disabled = false;
+    html2canvas(resultCard, { scale: 2, useCORS: true, backgroundColor: '#080d18' })
+      .then(canvas => {
+        resultCard.classList.remove('capturing');
+        if (actionsDiv) actionsDiv.style.display = originalActionsDisplay;
+        if (rBtn) rBtn.style.display = '';
+        downloadBtn.textContent = originalText;
+        downloadBtn.disabled = false;
 
-      const image = canvas.toDataURL("image/png");
-      const link = document.createElement('a');
-      link.href = image;
-      link.download = `Truth-Analyzer-${Date.now()}.png`;
-      link.click();
-      showToast(translations[currentLang].toast_image_ready);
-    }).catch(err => {
-      resultCard.classList.remove('capturing');
-      actionsDiv.style.display = originalActionsDisplay;
-      if(rBtn) rBtn.style.display = '';
-      downloadBtn.textContent = originalText;
-      downloadBtn.disabled = false;
-      showToast(translations[currentLang].toast_image_fail, true);
-    });
+        const image = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = image;
+        link.download = `Truth-Analyzer-${Date.now()}.png`;
+        link.click();
+        showToast(translations[currentLang].toast_image_ready);
+      })
+      .catch(() => {
+        resultCard.classList.remove('capturing');
+        if (actionsDiv) actionsDiv.style.display = originalActionsDisplay;
+        if (rBtn) rBtn.style.display = '';
+        downloadBtn.textContent = originalText;
+        downloadBtn.disabled = false;
+        showToast(translations[currentLang].toast_image_fail, true);
+      });
   });
 }
 
+// ==========================================
+// حفظ سجل التحليلات
+// ==========================================
 function saveToHistory(text, data) {
-  let history = JSON.parse(localStorage.getItem('nexusHistory')) || [];
+  let history = [];
+  try {
+    history = JSON.parse(localStorage.getItem('nexusHistory')) || [];
+  } catch {
+    history = [];
+  }
   const newItem = {
     id: Date.now(),
     snippet: text.substring(0, 50) + (text.length > 50 ? '...' : ''),
@@ -438,22 +626,34 @@ function saveToHistory(text, data) {
   renderHistory();
 }
 
+// ==========================================
+// عرض سجل التحليلات
+// ==========================================
 function renderHistory() {
   const historySection = document.getElementById('historySection');
   const historyList = document.getElementById('historyList');
-  let history = JSON.parse(localStorage.getItem('nexusHistory')) || [];
-  
-  if (history.length === 0) { 
-    if(historySection) historySection.hidden = true; 
-    return; 
+  let history = [];
+  try {
+    history = JSON.parse(localStorage.getItem('nexusHistory')) || [];
+  } catch {
+    history = [];
   }
-  
-  if(historySection) historySection.hidden = false;
-  if(historyList) {
+  if (history.length === 0) {
+    if (historySection) historySection.hidden = true;
+    return;
+  }
+  if (historySection) historySection.hidden = false;
+  if (historyList) {
     historyList.innerHTML = '';
     history.forEach(item => {
       const li = document.createElement('li');
-      li.innerHTML = `<div class="history-snippet">${item.snippet}</div><div class="history-date">${item.date}</div>`;
+      const snippet = document.createElement('div');
+      snippet.className = 'history-snippet';
+      snippet.textContent = item.snippet;
+      const date = document.createElement('div');
+      date.className = 'history-date';
+      date.textContent = item.date;
+      li.append(snippet, date);
       li.addEventListener('click', () => {
         document.getElementById('analyzerCard').style.display = 'none';
         displayResults(item.fullData);
@@ -465,39 +665,46 @@ function renderHistory() {
 }
 renderHistory();
 
+// ==========================================
+// رفع الصور واستخراج النصوص (OCR)
+// ==========================================
 const imageInput = document.getElementById('imageInput');
 const uploadImageBtn = document.getElementById('uploadImageBtn');
 const imageName = document.getElementById('imageName');
 
-if(uploadImageBtn) uploadImageBtn.addEventListener('click', () => { if(imageInput) imageInput.click(); });
+if (uploadImageBtn) {
+  uploadImageBtn.addEventListener('click', () => { if (imageInput) imageInput.click(); });
+}
 
-if(imageInput) {
-  imageInput.addEventListener('change', async (e) => {
+if (imageInput) {
+  imageInput.addEventListener('change', async e => {
     const file = e.target.files[0];
     if (!file) return;
-    if(imageName) { imageName.textContent = file.name; imageName.style.display = 'block'; }
-    
-    if (typeof Tesseract === 'undefined') {
-      showToast(currentLang === 'ar' ? 'جاري تحميل أدوات قراءة الصور...' : 'Loading OCR tools...');
-      await new Promise((resolve, reject) => {
-        const script = document.createElement('script');
-        script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
-        script.onload = resolve; script.onerror = reject;
-        document.head.appendChild(script);
-      });
+    if (imageName) {
+      imageName.textContent = file.name;
+      imageName.style.display = 'block';
     }
-
-    document.getElementById('analyzerCard').style.display = 'none';
-    document.getElementById('loadingBox').hidden = false;
-    startLoadingAnimation(translations[currentLang].loading_image);
-
     try {
+      if (typeof Tesseract === 'undefined') {
+        showToast(currentLang === 'ar' ? 'جاري تحميل أدوات قراءة الصور...' : 'Loading OCR tools...');
+        await new Promise((resolve, reject) => {
+          const script = document.createElement('script');
+          script.src = 'https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
+          script.onload = resolve;
+          script.onerror = reject;
+          document.head.appendChild(script);
+        });
+      }
+      document.getElementById('analyzerCard').style.display = 'none';
+      document.getElementById('loadingBox').hidden = false;
+      startLoadingAnimation(translations[currentLang].loading_image);
+
       const result = await Tesseract.recognize(file, currentLang === 'ar' ? 'ara+eng' : 'eng+ara');
       const extractedText = result.data.text.trim();
       stopLoadingAnimation();
       document.getElementById('loadingBox').hidden = true;
       document.getElementById('analyzerCard').style.display = 'block';
-      
+
       if (extractedText.length > 5) {
         messageInput.value = extractedText;
         messageInput.dispatchEvent(new Event('input'));
@@ -505,11 +712,13 @@ if(imageInput) {
       } else {
         showToast(translations[currentLang].error_image, true);
       }
-    } catch (err) {
+    } catch (error) {
+      console.error(error);
       stopLoadingAnimation();
       document.getElementById('loadingBox').hidden = true;
       document.getElementById('analyzerCard').style.display = 'block';
       showToast(translations[currentLang].error_image, true);
     }
+    imageInput.value = '';
   });
-    }
+  }
