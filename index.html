@@ -20,6 +20,12 @@
   
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <!-- ✅ 1. سكريبت إعلان Popunder -->
+  <script async src="https://ds.mrmnd.com/02d8bc1c-4376-4cef-8839-479f3b2a7422.js"></script>
+
+  <!-- ✅ 2. سكريبت إعلان Native -->
+  <script async src="https://ss.mrmnd.com/native.js"></script>
 </head>
 <body>
 
@@ -77,6 +83,11 @@
       <p class="consent-note" data-i18n="consent_note">بضغطك على التحليل توافق على إرسال النص لخدمة تحليل خارجية.</p>
     </section>
 
+    <!-- ✅ مكان ظهور الإعلان الأصلي (Native Ad) -->
+    <div style="margin: 20px 0; display: flex; justify-content: center; overflow: hidden;">
+      <div data-mndazid="12797395-2437-4e26-ab35-8d7c7be4bc26"></div>
+    </div>
+
     <section class="loading-box" id="loadingBox" hidden>
       <div class="loading-spinner" aria-hidden="true"></div>
       <p class="loading-text" id="loadingText" data-i18n="loading_1">جاري فحص النبرة...</p>
@@ -88,7 +99,6 @@
         <button id="resetBtn" class="reset-btn" type="button" data-i18n="result_reset">تحليل جديد</button>
       </div>
 
-      <!-- شبكة النتائج (بدون اللهجة والمنطقة) -->
       <div class="result-grid">
         <div class="result-block">
           <h3 data-i18n="result_tone">النبرة العامة</h3>
@@ -146,7 +156,6 @@
     </section>
   </main>
 
-  <!-- الفوتر (بدون حقوق طبع وبدون اسم الشركة) -->
   <footer class="site-footer">
     <div class="container footer-inner" style="padding: 20px 0;">
       <div class="footer-links">
@@ -156,7 +165,6 @@
     </div>
   </footer>
 
-  <!-- نافذة سياسة الخصوصية -->
   <div class="modal" id="privacyModal" hidden>
     <div class="modal-content">
       <button type="button" class="modal-close" data-close="privacyModal" aria-label="Close">✕</button>
@@ -170,7 +178,6 @@
     </div>
   </div>
 
-  <!-- نافذة إخلاء المسؤولية -->
   <div class="modal" id="disclaimerModal" hidden>
     <div class="modal-content">
       <button type="button" class="modal-close" data-close="disclaimerModal" aria-label="Close">✕</button>
@@ -184,8 +191,54 @@
     </div>
   </div>
 
-  <!-- استدعاء ملف الجافاسكريبت الأساسي -->
+  <!-- ✅ سكريبت الموقع الأساسي -->
   <script src="script.js"></script>
 
+  <!-- ✅ كود التحكم في الإعلان (يعتمد على النقرة الحقيقية للزائر) -->
+  <script>
+  (function () {
+    'use strict';
+
+    const EXIT_INTENT = true;
+    const MOBILE_ENABLED = true;
+
+    // التحقق من حالة الإعلان في هذه الجلسة
+    let adTriggered = sessionStorage.getItem('popunder_triggered') === 'true';
+
+    function handleAdSession() {
+      if (adTriggered) return; 
+      adTriggered = true;
+      sessionStorage.setItem('popunder_triggered', 'true');
+      // تم إلغاء النقرة الاصطناعية هنا، وتركنا السكريبت الأساسي يعمل بنفسه
+    }
+
+    /* ---------- 1) تفعيل الحالة عند أول نقرة حقيقية ---------- */
+    document.addEventListener('click', function () {
+      handleAdSession();
+    }, { passive: true });
+
+    /* ---------- 2) Exit-intent (سطح المكتب) ---------- */
+    if (EXIT_INTENT) {
+      document.addEventListener('mouseleave', function (e) {
+        if (e.clientY <= 0) {
+          handleAdSession();
+        }
+      });
+    }
+
+    /* ---------- 3) بديل Exit-intent على الموبايل ---------- */
+    if (EXIT_INTENT && MOBILE_ENABLED && /Mobi|Android/i.test(navigator.userAgent)) {
+      let hiddenAt = 0;
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'hidden') {
+          hiddenAt = Date.now();
+        } else if (hiddenAt && Date.now() - hiddenAt > 1500) {
+          handleAdSession();
+        }
+      });
+    }
+  })();
+  </script>
+
 </body>
-          </html>
+                                                        </html>
