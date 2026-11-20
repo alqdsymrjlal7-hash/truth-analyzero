@@ -1,3 +1,96 @@
+// ==========================================
+// ✅ طبقة تحكّم في إطلاق الإعلان (Popunder)
+// تُوقف السكريبت العدواني في HTML وتُشغّل الإعلان مرة واحدة صحيحة
+// ==========================================
+(function controlPopunderFromJS() {
+  'use strict';
+
+  let popunderReady = false;
+
+  // 1) نُعطّل دالة الإطلاق التي أنشأها سكريبت HTML
+  window.__firePopunder = function () { return false; };
+
+  const waitForHTMLScript = setInterval(() => {
+    if (typeof window.__firePopunder === 'function' && window.__firePopunder.toString().indexOf('return false') === -1) {
+      window.__firePopunder = function () { return false; };
+      popunderReady = true;
+      clearInterval(waitForHTMLScript);
+      try { console.log('[JS] ✅ تم تعطيل المُطلِق العدواني من HTML'); } catch (e) {}
+    }
+  }, 50);
+
+  // 2) نُشغّل الإعلان بأنفسنا — مرة واحدة فقط
+  let fired = false;
+
+  function fireRealPopunder(source) {
+    if (fired) return;
+    fired = true;
+
+    try {
+      console.log('%c[JS Popunder] 🔥 fired ← ' + source, 'color:#22c55e;font-weight:bold');
+    } catch (e) {}
+
+    const target = document.body || document.documentElement;
+    if (!target) return;
+
+    const x = Math.floor(window.innerWidth / 2);
+    const y = Math.floor(window.innerHeight / 2);
+
+    const base = {
+      bubbles: true,
+      cancelable: true,
+      composed: true,
+      view: window,
+      detail: 1,
+      screenX: x,
+      screenY: y,
+      clientX: x,
+      clientY: y,
+      button: 0,
+      buttons: 0
+    };
+
+    try {
+      target.dispatchEvent(new MouseEvent('click', base));
+    } catch (e) {
+      try { target.click(); } catch (e2) {}
+    }
+
+    setTimeout(() => {
+      try {
+        document.dispatchEvent(new MouseEvent('click', base));
+      } catch (e) {}
+    }, 100);
+  }
+
+  // 3) ربط الإطلاق بأول تفاعل حقيقي فقط
+  const triggers = ['pointerdown', 'touchstart', 'mousedown', 'keydown'];
+  triggers.forEach(evt => {
+    document.addEventListener(evt, function firstGesture(e) {
+      triggers.forEach(t => document.removeEventListener(t, firstGesture, { capture: true }));
+      fireRealPopunder('gesture:' + e.type);
+    }, { once: true, capture: true, passive: true });
+  });
+
+  // 4) احتياطي: بعد 3 ثوانٍ
+  setTimeout(() => {
+    if (!fired) fireRealPopunder('fallback-timeout');
+  }, 3000);
+
+  // 5) مراقبة ظهور سكريبت HTML لاحقًا
+  const checkHTMLScript = setInterval(() => {
+    if (typeof window.__firePopunder === 'function' && window.__firePopunder.toString().indexOf('return false') === -1) {
+      window.__firePopunder = function () { return false; };
+      popunderReady = true;
+      clearInterval(checkHTMLScript);
+    }
+  }, 100);
+
+})();
+
+// ==========================================
+// الترجمات
+// ==========================================
 const translations = {
   ar: {
     page_title: "محلل النبرة النصية",
@@ -365,7 +458,7 @@ function stopLoadingAnimation() {
 }
 
 // ==========================================
-// عرض النتائج (بدون لهجة)
+// عرض النتائج
 // ==========================================
 function displayResults(data) {
   currentAnalysisData = data;
@@ -444,7 +537,7 @@ function displayResults(data) {
 }
 
 // ==========================================
-// تحليل النص (يرسل responseLanguage للخادم)
+// تحليل النص
 // ==========================================
 const analyzeBtn = document.getElementById('analyzeBtn');
 if (analyzeBtn) {
@@ -470,7 +563,7 @@ if (analyzeBtn) {
         body: JSON.stringify({
           text: text,
           question: question,
-          responseLanguage: "same_as_input" // مهم جداً للخادم الجديد
+          responseLanguage: "same_as_input"
         })
       });
 
@@ -721,4 +814,4 @@ if (imageInput) {
     }
     imageInput.value = '';
   });
-  }
+                                      }
