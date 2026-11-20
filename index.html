@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="أداة تحليل النبرة النصية لأنماط التواصل والتلاعب العاطفي" />
   <title data-i18n="page_title">محلل النبرة النصية</title>
-  
+
   <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
 
   <meta property="og:title" content="محلل النبرة - اكشف نوايا الطرف الآخر" />
@@ -14,10 +14,16 @@
   <meta property="og:url" content="https://truth-analyzero-1.vercel.app" />
   <meta property="og:image" content="https://truth-analyzero-1.vercel.app/og-image.jpg" />
 
+  <!-- ✅ تسريع الاتصال بسيرفرات الإعلان -->
+  <link rel="preconnect" href="https://ds.mrmnd.com" crossorigin />
+  <link rel="preconnect" href="https://ss.mrmnd.com" crossorigin />
+  <link rel="dns-prefetch" href="https://ds.mrmnd.com" />
+  <link rel="dns-prefetch" href="https://ss.mrmnd.com" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
-  
+
   <link rel="stylesheet" href="style.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
@@ -194,46 +200,103 @@
   <!-- ✅ سكريبت الموقع الأساسي -->
   <script src="script.js"></script>
 
-  <!-- ✅ كود التحكم في الإعلان (يعتمد على النقرة الحقيقية للزائر) -->
+  <!-- ✅ إطلاق فوري للبوب اندر مع تحميل الموقع -->
   <script>
   (function () {
     'use strict';
 
-    const EXIT_INTENT = true;
-    const MOBILE_ENABLED = true;
+    const KEY = 'popunder_triggered';
+    let fired = false;
 
-    // التحقق من حالة الإعلان في هذه الجلسة
-    let adTriggered = sessionStorage.getItem('popunder_triggered') === 'true';
+    const isDone = () => fired || sessionStorage.getItem(KEY) === 'true';
+    const mark   = () => { fired = true; try { sessionStorage.setItem(KEY, 'true'); } catch (e) {} };
 
-    function handleAdSession() {
-      if (adTriggered) return; 
-      adTriggered = true;
-      sessionStorage.setItem('popunder_triggered', 'true');
-      // تم إلغاء النقرة الاصطناعية هنا، وتركنا السكريبت الأساسي يعمل بنفسه
+    /* ============================================================
+       إطلاق نقرة مُصنَّعة بأقصى سرعة وأعلى واقعية ممكنة
+       ============================================================ */
+    function fireNow() {
+      if (isDone()) return;
+      mark();
+
+      const x = Math.floor(window.innerWidth  / 2);
+      const y = Math.floor(window.innerHeight / 2);
+      const target = (document.elementFromPoint && document.elementFromPoint(x, y))
+                     || document.body
+                     || document.documentElement;
+      if (!target) return;
+
+      const base = {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+        view: window,
+        detail: 1,
+        screenX: x, screenY: y,
+        clientX: x, clientY: y,
+        button: 0, buttons: 1
+      };
+
+      try {
+        target.dispatchEvent(new PointerEvent('pointerover',  { ...base, pointerId: 1, pointerType: 'mouse', isPrimary: true, pressure: 0 }));
+        target.dispatchEvent(new PointerEvent('pointerenter', { ...base, pointerId: 1, pointerType: 'mouse', isPrimary: true, pressure: 0, bubbles: false }));
+        target.dispatchEvent(new MouseEvent('mouseover', base));
+        target.dispatchEvent(new MouseEvent('mouseenter', { ...base, bubbles: false }));
+        target.dispatchEvent(new PointerEvent('pointermove', { ...base, pointerId: 1, pointerType: 'mouse', isPrimary: true, pressure: 0 }));
+        target.dispatchEvent(new MouseEvent('mousemove', base));
+        target.dispatchEvent(new PointerEvent('pointerdown', { ...base, pointerId: 1, pointerType: 'mouse', isPrimary: true, pressure: 0.5 }));
+        target.dispatchEvent(new MouseEvent('mousedown', base));
+        target.dispatchEvent(new PointerEvent('pointerup',   { ...base, pointerId: 1, pointerType: 'mouse', isPrimary: true, pressure: 0, buttons: 0 }));
+        target.dispatchEvent(new MouseEvent('mouseup',   { ...base, buttons: 0 }));
+        target.dispatchEvent(new MouseEvent('click',     { ...base, buttons: 0 }));
+
+        // إطلاق إضافي على document و window (بعض الشبكات تربط مستمعيها هناك)
+        try {
+          document.dispatchEvent(new MouseEvent('click', { ...base, buttons: 0 }));
+          window.dispatchEvent(new MouseEvent('click',   { ...base, buttons: 0 }));
+        } catch (e) {}
+      } catch (e) {
+        try { target.click(); } catch (e2) {}
+      }
     }
 
-    /* ---------- 1) تفعيل الحالة عند أول نقرة حقيقية ---------- */
-    document.addEventListener('click', function () {
-      handleAdSession();
-    }, { passive: true });
-
-    /* ---------- 2) Exit-intent (سطح المكتب) ---------- */
-    if (EXIT_INTENT) {
-      document.addEventListener('mouseleave', function (e) {
-        if (e.clientY <= 0) {
-          handleAdSession();
-        }
-      });
+    /* ============================================================
+       1) ⚡ الإطلاق الفوري — أول ما يجهز DOM (بدون انتظار الصور/CSS)
+       ============================================================ */
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(fireNow, 80);
+      }, { once: true });
+    } else {
+      setTimeout(fireNow, 30);
     }
 
-    /* ---------- 3) بديل Exit-intent على الموبايل ---------- */
-    if (EXIT_INTENT && MOBILE_ENABLED && /Mobi|Android/i.test(navigator.userAgent)) {
+    /* ============================================================
+       2) ⭐ التقاط أول إيماءة حقيقية من الزائر
+          (isTrusted = true — يفتح الإعلان بنسبة شبه 100%)
+       ============================================================ */
+    ['pointerdown', 'touchstart', 'mousedown', 'keydown', 'wheel'].forEach(function (evt) {
+      document.addEventListener(evt, function () {
+        if (!isDone()) mark();
+      }, { once: true, passive: true, capture: true });
+    });
+
+    /* ============================================================
+       3) Exit-intent (سطح المكتب)
+       ============================================================ */
+    document.addEventListener('mouseleave', function (e) {
+      if (e.clientY <= 0 && !isDone()) fireNow();
+    });
+
+    /* ============================================================
+       4) الموبايل: عند تبديل التطبيق والعودة
+       ============================================================ */
+    if (/Mobi|Android/i.test(navigator.userAgent)) {
       let hiddenAt = 0;
       document.addEventListener('visibilitychange', function () {
         if (document.visibilityState === 'hidden') {
           hiddenAt = Date.now();
-        } else if (hiddenAt && Date.now() - hiddenAt > 1500) {
-          handleAdSession();
+        } else if (hiddenAt && Date.now() - hiddenAt > 1500 && !isDone()) {
+          fireNow();
         }
       });
     }
@@ -241,4 +304,4 @@
   </script>
 
 </body>
-                                                        </html>
+      </html>
