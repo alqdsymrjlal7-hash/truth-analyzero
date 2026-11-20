@@ -2,7 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f172a" />
   <meta name="description" content="أداة تحليل النبرة النصية لأنماط التواصل والتلاعب العاطفي" />
   <title data-i18n="page_title">محلل النبرة النصية</title>
 
@@ -14,7 +15,7 @@
   <meta property="og:url" content="https://truth-analyzero-1.vercel.app" />
   <meta property="og:image" content="https://truth-analyzero-1.vercel.app/og-image.jpg" />
 
-  <!-- ✅ تسريع الاتصال بسيرفرات الإعلان -->
+  <!-- تسريع الاتصال بخدمات الإعلان والخطوط -->
   <link rel="preconnect" href="https://ds.mrmnd.com" crossorigin />
   <link rel="preconnect" href="https://ss.mrmnd.com" crossorigin />
   <link rel="dns-prefetch" href="https://ds.mrmnd.com" />
@@ -25,12 +26,208 @@
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Inter:wght@400;600;800&display=swap" rel="stylesheet" />
 
   <link rel="stylesheet" href="style.css" />
+
+  <!-- تحسينات التجاوب للجوال والتابلت واللابتوب -->
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+    html {
+      -webkit-text-size-adjust: 100%;
+      -webkit-tap-highlight-color: transparent;
+      scroll-behavior: smooth;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+    body {
+      max-width: 100%;
+      overflow-x: hidden;
+      margin: 0;
+      font-family: 'Cairo', 'Inter', system-ui, -apple-system, sans-serif;
+      line-height: 1.7;
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+    img, svg, video { max-width: 100%; height: auto; }
+    .container {
+      width: 100%;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding-left: 16px;
+      padding-right: 16px;
+    }
+    .site-header { position: sticky; top: 0; z-index: 100; }
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 0;
+      flex-wrap: nowrap;
+    }
+    .brand { display: inline-flex; align-items: center; gap: 8px; text-decoration: none; }
+    .brand-text { font-weight: 800; }
+    .lang-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      min-height: 40px;
+    }
+    .hero { padding: 24px 0 8px; text-align: center; }
+    .hero-title {
+      font-size: clamp(1.5rem, 5vw + 0.5rem, 2.6rem);
+      line-height: 1.25;
+      margin: 0 0 10px;
+    }
+    .hero-subtitle { font-size: clamp(.95rem, 2.5vw, 1.1rem); opacity: .85; margin: 0; }
+    .analyzer-card, .result-card {
+      padding: clamp(16px, 3vw, 28px);
+      border-radius: 16px;
+      margin-bottom: 20px;
+      width: 100%;
+      min-width: 0;
+      overflow: hidden;
+    }
+    .field-label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+      font-size: clamp(.9rem, 2.4vw, 1rem);
+    }
+    .message-input, .question-input {
+      display: block;
+      width: 100%;
+      min-width: 0;
+      font-family: inherit;
+      font-size: 16px;
+      padding: 14px;
+      border-radius: 12px;
+      line-height: 1.6;
+      resize: vertical;
+      min-height: 120px;
+      transition: border-color .2s ease;
+    }
+    .question-input { min-height: 48px; height: 48px; }
+    .char-counter { text-align: left; font-size: .85rem; margin-top: 6px; opacity: .7; }
+    .cta-btn, .copy-btn, .wa-btn, .download-btn, .share-btn, .reset-btn, .tag, .link-btn {
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      border-radius: 12px;
+      border: none;
+      transition: transform .15s ease, opacity .15s ease;
+      min-height: 48px;
+      padding: 12px 18px;
+      font-size: clamp(.9rem, 2.4vw, 1rem);
+      line-height: 1.3;
+    }
+    button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visible {
+      outline: 3px solid #8b5cf6;
+      outline-offset: 3px;
+    }
+    .cta-btn { width: 100%; font-size: clamp(1rem, 2.8vw, 1.1rem); }
+    button:active { transform: scale(.98); }
+    .tags { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tags .tag { flex: 1 1 auto; min-width: 100px; }
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+    .result-block { min-width: 0; overflow-wrap: anywhere; word-wrap: break-word; }
+    .full-width { grid-column: 1 / -1; }
+    .result-list { padding-inline-start: 1.2em; margin: 0; overflow-wrap: anywhere; }
+    .result-list li { margin-bottom: 6px; }
+    .result-actions { display: flex; flex-direction: column; gap: 10px; }
+    .result-actions > div { display: flex; gap: 10px; flex-wrap: wrap; }
+    .result-actions > div > button { flex: 1 1 140px; }
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      background: rgba(0,0,0,.55);
+      overflow-y: auto;
+    }
+    .modal[hidden] { display: none !important; }
+    .modal-content {
+      width: 100%;
+      max-width: 560px;
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 16px;
+      padding: clamp(18px, 4vw, 28px);
+      position: relative;
+      -webkit-overflow-scrolling: touch;
+    }
+    .modal-close {
+      position: absolute;
+      top: 10px;
+      inset-inline-end: 10px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 1rem;
+      min-height: 40px;
+    }
+    .footer-links { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+    .link-btn { background: transparent; text-decoration: underline; min-height: 40px; padding: 6px 10px; }
+    .loading-box { text-align: center; padding: 30px 16px; }
+    .loading-spinner { margin: 0 auto 14px; }
+
+    @media (max-width: 640px) {
+      .container { padding-left: 14px; padding-right: 14px; }
+      .hero { padding: 18px 0 4px; }
+      .result-grid { grid-template-columns: 1fr; gap: 12px; }
+      .analyzer-card, .result-card { padding: 16px; border-radius: 14px; }
+      .cta-btn, .copy-btn, .wa-btn, .download-btn, .share-btn, .reset-btn, .tag {
+        min-height: 50px;
+        font-size: 15px;
+      }
+      .tags .tag { flex: 1 1 45%; }
+      .result-actions > div { flex-direction: column; }
+      .result-actions > div > button { flex: 1 1 auto; width: 100%; }
+      .message-input { min-height: 100px; }
+      .brand-text { font-size: 1rem; }
+      .lang-toggle { padding: 6px 12px; }
+      .modal { padding: 10px; align-items: flex-start; padding-top: 40px; }
+      .modal-content { max-height: 85vh; }
+      .hero-title { overflow-wrap: anywhere; }
+    }
+    @media (max-width: 380px) {
+      .container { padding-left: 10px; padding-right: 10px; }
+      .hero-title { font-size: 1.35rem; }
+      .tags .tag { flex: 1 1 100%; }
+    }
+    @media (min-width: 641px) and (max-width: 1024px) {
+      .container { max-width: 860px; }
+      .result-grid { gap: 16px; }
+    }
+    @media (min-width: 1025px) {
+      .container { max-width: 1100px; padding-left: 24px; padding-right: 24px; }
+      .hero { padding: 36px 0 12px; }
+      .analyzer-card, .result-card { padding: 32px; }
+      .message-input { min-height: 140px; }
+      .cta-btn:hover, .copy-btn:hover, .wa-btn:hover, .download-btn:hover,
+      .share-btn:hover, .reset-btn:hover, .tag:hover { transform: translateY(-1px); opacity: .92; }
+    }
+    @media (hover: none) { button:hover { transform: none !important; } }
+    @media print {
+      .site-header, .site-footer, .result-actions, .reset-btn, .lang-toggle { display: none !important; }
+      .result-card, .analyzer-card { box-shadow: none !important; border: 1px solid #ccc !important; }
+    }
+  </style>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-  <!-- ✅ 1. سكريبت إعلان Popunder -->
+  <!-- سكريبتات شبكة الإعلان الحالية -->
   <script async src="https://ds.mrmnd.com/02d8bc1c-4376-4cef-8839-479f3b2a7422.js"></script>
-
-  <!-- ✅ 2. سكريبت إعلان Native -->
   <script async src="https://ss.mrmnd.com/native.js"></script>
 </head>
 <body>
@@ -59,15 +256,15 @@
   <main class="container">
     <section class="analyzer-card" id="analyzerCard">
       <label for="messageInput" class="field-label" data-i18n="input_label">النص المراد تحليله</label>
-      <textarea id="messageInput" class="message-input" data-i18n-placeholder="input_placeholder" placeholder="ألصق الرسالة أو المحادثة هنا لفحصها..." maxlength="2000" rows="1"></textarea>
+      <textarea id="messageInput" class="message-input" data-i18n-placeholder="input_placeholder" placeholder="ألصق الرسالة أو المحادثة هنا لفحصها..." maxlength="2000" rows="4"></textarea>
       <div class="char-counter"><span id="charCount">0</span> / 2000</div>
 
-      <div class="image-upload-section" style="margin-bottom: 20px; text-align: center;">
-        <input type="file" id="imageInput" accept="image/*" style="display: none;">
-        <button type="button" id="uploadImageBtn" class="tag" style="width: 100%; border-style: dashed;">
+      <div class="image-upload-section" style="margin:16px 0;text-align:center;">
+        <input type="file" id="imageInput" accept="image/*" style="display:none;">
+        <button type="button" id="uploadImageBtn" class="tag" style="width:100%;border-style:dashed;">
           📷 أو قم برفع صورة محادثة لتحليلها
         </button>
-        <p id="imageName" style="display: none; color: var(--success); font-size: 0.9rem; margin-top: 8px;"></p>
+        <p id="imageName" style="display:none;color:var(--success);font-size:.9rem;margin-top:8px;"></p>
       </div>
 
       <div class="tags-section">
@@ -80,7 +277,7 @@
         </div>
       </div>
 
-      <div class="question-section" style="margin-bottom: 24px;">
+      <div class="question-section" style="margin:20px 0;">
         <label for="questionInput" class="field-label" data-i18n="question_label">هل لديك سؤال حول النص؟ (اختياري)</label>
         <input type="text" id="questionInput" class="question-input" placeholder="مثال: هل هذا الشخص يهددني؟ أو كيف أرد عليه؟" data-i18n-placeholder="question_placeholder">
       </div>
@@ -89,8 +286,8 @@
       <p class="consent-note" data-i18n="consent_note">بضغطك على التحليل توافق على إرسال النص لخدمة تحليل خارجية.</p>
     </section>
 
-    <!-- ✅ مكان ظهور الإعلان الأصلي (Native Ad) -->
-    <div style="margin: 20px 0; display: flex; justify-content: center; overflow: hidden;">
+    <!-- مكان ظهور إعلان Native -->
+    <div style="margin:20px 0;display:flex;justify-content:center;overflow:hidden;">
       <div data-mndazid="12797395-2437-4e26-ab35-8d7c7be4bc26"></div>
     </div>
 
@@ -110,17 +307,14 @@
           <h3 data-i18n="result_tone">النبرة العامة</h3>
           <p id="resultTone" class="result-text"></p>
         </div>
-
         <div class="result-block">
           <h3 data-i18n="result_emotional">البصمات العاطفية</h3>
           <ul id="resultEmotional" class="result-list"></ul>
         </div>
-
         <div class="result-block">
           <h3 data-i18n="result_confidence">مؤشرات الثقة</h3>
           <ul id="resultConfidence" class="result-list"></ul>
         </div>
-
         <div class="result-block">
           <h3 data-i18n="result_hedging">مؤشرات التهرب</h3>
           <ul id="resultHedging" class="result-list"></ul>
@@ -139,22 +333,22 @@
 
       <div class="result-block full-width" id="resultAnswerBlock" hidden>
         <h3 data-i18n="result_answer_title">إجابة سؤالك</h3>
-        <p id="resultAnswer" class="result-text" style="border-right-color: var(--success); color: var(--success);"></p>
+        <p id="resultAnswer" class="result-text" style="border-right-color:var(--success);color:var(--success);"></p>
       </div>
 
       <p class="result-disclaimer" data-i18n="result_disclaimer">⚠️ هذا تحليل لغوي تعليمي، وليس دليلًا على الصدق أو الكذب.</p>
 
-      <div class="result-actions" style="display: flex; flex-direction: column; gap: 10px;">
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <button id="copyBtn" class="copy-btn" type="button" data-i18n="result_copy" style="flex: 1;">نسخ النتيجة 📋</button>
-          <button id="whatsappBtn" class="wa-btn" type="button" data-i18n="result_whatsapp" style="flex: 1;">مشاركة واتساب 💬</button>
+      <div class="result-actions">
+        <div>
+          <button id="copyBtn" class="copy-btn" type="button" data-i18n="result_copy">نسخ النتيجة 📋</button>
+          <button id="whatsappBtn" class="wa-btn" type="button" data-i18n="result_whatsapp">مشاركة واتساب 💬</button>
         </div>
         <button id="downloadBtn" class="download-btn" type="button" data-i18n="result_download">تحميل النتيجة كصورة 📸</button>
         <button id="shareBtn" class="share-btn" type="button" data-i18n="result_share">نسخ رابط الموقع</button>
       </div>
     </section>
 
-    <section id="historySection" class="result-card" hidden style="margin-top: 30px; border-color: var(--border);">
+    <section id="historySection" class="result-card" hidden style="margin-top:30px;">
       <div class="result-header">
         <h2 data-i18n="history_title">سجل التحليلات السابقة</h2>
       </div>
@@ -163,7 +357,7 @@
   </main>
 
   <footer class="site-footer">
-    <div class="container footer-inner" style="padding: 20px 0;">
+    <div class="container footer-inner" style="padding:20px 0;">
       <div class="footer-links">
         <button type="button" class="link-btn" data-modal="privacyModal" data-i18n="footer_privacy">سياسة الخصوصية</button>
         <button type="button" class="link-btn" data-modal="disclaimerModal" data-i18n="footer_disclaimer">إخلاء المسؤولية</button>
@@ -197,111 +391,87 @@
     </div>
   </div>
 
-  <!-- ✅ سكريبت الموقع الأساسي -->
+  <!-- ملف وظائف الموقع الأصلي: التحليل والترجمة والنتائج والسجل -->
   <script src="script.js"></script>
 
-  <!-- ✅ إطلاق فوري للبوب اندر مع تحميل الموقع -->
+  <!-- مراقبة أحداث التصفح والتفاعل دون نقرات اصطناعية أو نوافذ إجبارية -->
   <script>
   (function () {
     'use strict';
 
-    const KEY = 'popunder_triggered';
-    let fired = false;
+    const AD_CONFIG = {
+      cooldownMs: 30000,
+      maxTrackedInteractions: 20
+    };
 
-    const isDone = () => fired || sessionStorage.getItem(KEY) === 'true';
-    const mark   = () => { fired = true; try { sessionStorage.setItem(KEY, 'true'); } catch (e) {} };
+    let lastTrackedAt = 0;
+    let trackedInteractions = 0;
 
-    /* ============================================================
-       إطلاق نقرة مُصنَّعة بأقصى سرعة وأعلى واقعية ممكنة
-       ============================================================ */
-    function fireNow() {
-      if (isDone()) return;
-      mark();
+    function trackAdEvent(eventName) {
+      const now = Date.now();
 
-      const x = Math.floor(window.innerWidth  / 2);
-      const y = Math.floor(window.innerHeight / 2);
-      const target = (document.elementFromPoint && document.elementFromPoint(x, y))
-                     || document.body
-                     || document.documentElement;
-      if (!target) return;
+      if (trackedInteractions >= AD_CONFIG.maxTrackedInteractions) return;
+      if (now - lastTrackedAt < AD_CONFIG.cooldownMs) return;
 
-      const base = {
-        bubbles: true,
-        cancelable: true,
-        composed: true,
-        view: window,
-        detail: 1,
-        screenX: x, screenY: y,
-        clientX: x, clientY: y,
-        button: 0, buttons: 1
-      };
+      lastTrackedAt = now;
+      trackedInteractions++;
 
-      try {
-        target.dispatchEvent(new PointerEvent('pointerover',  { ...base, pointerId: 1, pointerType: 'mouse', isPrimary: true, pressure: 0 }));
-        target.dispatchEvent(new PointerEvent('pointerenter', { ...base, pointerId: 1, pointerType: 'mouse', isPrimary: true, pressure: 0, bubbles: false }));
-        target.dispatchEvent(new MouseEvent('mouseover', base));
-        target.dispatchEvent(new MouseEvent('mouseenter', { ...base, bubbles: false }));
-        target.dispatchEvent(new PointerEvent('pointermove', { ...base, pointerId: 1, pointerType: 'mouse', isPrimary: true, pressure: 0 }));
-        target.dispatchEvent(new MouseEvent('mousemove', base));
-        target.dispatchEvent(new PointerEvent('pointerdown', { ...base, pointerId: 1, pointerType: 'mouse', isPrimary: true, pressure: 0.5 }));
-        target.dispatchEvent(new MouseEvent('mousedown', base));
-        target.dispatchEvent(new PointerEvent('pointerup',   { ...base, pointerId: 1, pointerType: 'mouse', isPrimary: true, pressure: 0, buttons: 0 }));
-        target.dispatchEvent(new MouseEvent('mouseup',   { ...base, buttons: 0 }));
-        target.dispatchEvent(new MouseEvent('click',     { ...base, buttons: 0 }));
+      // تسجيل الحدث للمراجعة فقط.
+      // لا تُنشأ نقرة اصطناعية ولا تُفتح نافذة تلقائيًا.
+      window.dispatchEvent(new CustomEvent('site:ad-eligible-event', {
+        detail: { eventName: eventName }
+      }));
 
-        // إطلاق إضافي على document و window (بعض الشبكات تربط مستمعيها هناك)
-        try {
-          document.dispatchEvent(new MouseEvent('click', { ...base, buttons: 0 }));
-          window.dispatchEvent(new MouseEvent('click',   { ...base, buttons: 0 }));
-        } catch (e) {}
-      } catch (e) {
-        try { target.click(); } catch (e2) {}
+      console.info('[Ad eligibility event]', eventName);
+    }
+
+    // التفاعل الحقيقي مع زر التحليل.
+    // لا يمنع هذا المستمع معالج التحليل الموجود في script.js.
+    document.addEventListener('click', function (event) {
+      const button = event.target.closest('#analyzeBtn');
+      if (button) trackAdEvent('analyze-button-click');
+    }, true);
+
+    // الروابط التي يختار المستخدم فتحها في نافذة/تبويب جديد.
+    document.addEventListener('click', function (event) {
+      const link = event.target.closest('a[target="_blank"]');
+      if (link) trackAdEvent('user-opened-new-tab-link');
+    }, true);
+
+    // العودة إلى التبويب.
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible') {
+        trackAdEvent('tab-visible');
       }
-    }
-
-    /* ============================================================
-       1) ⚡ الإطلاق الفوري — أول ما يجهز DOM (بدون انتظار الصور/CSS)
-       ============================================================ */
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', function () {
-        setTimeout(fireNow, 80);
-      }, { once: true });
-    } else {
-      setTimeout(fireNow, 30);
-    }
-
-    /* ============================================================
-       2) ⭐ التقاط أول إيماءة حقيقية من الزائر
-          (isTrusted = true — يفتح الإعلان بنسبة شبه 100%)
-       ============================================================ */
-    ['pointerdown', 'touchstart', 'mousedown', 'keydown', 'wheel'].forEach(function (evt) {
-      document.addEventListener(evt, function () {
-        if (!isDone()) mark();
-      }, { once: true, passive: true, capture: true });
     });
 
-    /* ============================================================
-       3) Exit-intent (سطح المكتب)
-       ============================================================ */
-    document.addEventListener('mouseleave', function (e) {
-      if (e.clientY <= 0 && !isDone()) fireNow();
+    // العودة إلى الصفحة من ذاكرة المتصفح أو التنقل للخلف/الأمام.
+    window.addEventListener('pageshow', function () {
+      trackAdEvent('page-shown-or-restored');
     });
 
-    /* ============================================================
-       4) الموبايل: عند تبديل التطبيق والعودة
-       ============================================================ */
-    if (/Mobi|Android/i.test(navigator.userAgent)) {
-      let hiddenAt = 0;
-      document.addEventListener('visibilitychange', function () {
-        if (document.visibilityState === 'hidden') {
-          hiddenAt = Date.now();
-        } else if (hiddenAt && Date.now() - hiddenAt > 1500 && !isDone()) {
-          fireNow();
-        }
-      });
-    }
+    window.addEventListener('popstate', function () {
+      trackAdEvent('browser-back-or-forward');
+    });
+
+    // مغادرة الصفحة أو إخفاؤها. لا يمكن فتح Popunder بشكل موثوق هنا.
+    window.addEventListener('pagehide', function () {
+      console.info('[Navigation] Page is being hidden or left');
+    });
+
+    // فقدان/استعادة التركيز.
+    window.addEventListener('blur', function () {
+      console.info('[Navigation] Window lost focus');
+    });
+
+    window.addEventListener('focus', function () {
+      trackAdEvent('window-focus-return');
+    });
+
+    // يمكن لسكريبت الإعلان أو تكامل مخصص الاستماع لهذا الحدث.
+    // هذا الملف وحده لا يستدعي واجهة غير موثقة من شبكة الإعلان.
   })();
   </script>
 
 </body>
-      </html>
+  </html>
